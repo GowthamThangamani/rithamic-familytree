@@ -252,13 +252,17 @@ export class TreeRenderer {
 
   private findRootIndividuals(): Individual[] {
     const all = dataService.getAllIndividuals();
-    // Primary root: Periya Pannai (#19) or anyone with no parents in Gen 1
+    // Return all root ancestors who have no parents recorded in the database and have children or are Gen 1
     const roots = all.filter(p => {
       const parents = dataService.getParents(p.id);
-      return parents.length === 0 && (p.generation === 1 || p.id === 19) && p.gender === 'male';
+      const children = dataService.getChildren(p.id);
+      return parents.length === 0 && p.gender === 'male' && (p.generation === 1 || children.length > 0);
     });
 
-    if (roots.length > 0) return roots;
+    if (roots.length > 0) {
+      // Sort so Gen 1 roots (e.g. Periya Pannai) appear first, followed by other family trees
+      return roots.sort((a, b) => (a.generation || 1) - (b.generation || 1));
+    }
 
     // Fallback: search for top-most generation males
     const minGen = Math.min(...all.map(p => p.generation || 1));
@@ -712,10 +716,15 @@ export class TreeRenderer {
       this.selectNode(person.id);
     });
 
-    // Button 2: Full Lineage Trace
+    // Button 2: Tree Focus & Center
     card.querySelector('.btn-lineage')?.addEventListener('click', (e) => {
       e.stopPropagation();
-      this.focusPedigree(person.id);
+      if (this.viewMode === 'TREE') {
+        this.selectNode(person.id);
+        this.centerOnNode(person.id);
+      } else {
+        this.focusPedigree(person.id);
+      }
     });
 
     return card;

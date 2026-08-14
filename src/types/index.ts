@@ -1,4 +1,4 @@
-export type Gender = 'male' | 'female';
+export type Gender = 'male' | 'female' | 'Male' | 'Female';
 export type UserRole = 'admin' | 'editor' | 'viewer';
 
 export interface AuthUser {
@@ -13,7 +13,7 @@ export interface Individual {
   id: number;
   fullName: string;
   tamilName?: string | null;
-  gender: Gender;
+  gender: 'male' | 'female';
   generation: number;
   isLiving: boolean;
   birthYear?: string | number | null;
@@ -21,37 +21,28 @@ export interface Individual {
   nativePlace?: string | null;
   branch?: string | null;
   contact?: string | null;
+  address?: string | null;
   occupation?: string | null;
   notes?: string | null;
   parents?: number[];
   spouses?: number[];
   children?: number[];
+  siblings?: number[];
   relationDepth?: number;
+  identityClues?: {
+    searchDescriptor?: string;
+    parentSpouseSummary?: string;
+    lifespanText?: string;
+    branchName?: string;
+    generationLevel?: number;
+  };
 }
 
 export interface Branch {
-  branchId: string;
+  branchId?: string;
   name: string;
-  ancestorRoot: string;
-  keyMembers: string[];
-}
-
-export interface DatasetSummary {
-  totalIndividuals: number;
-  activeLinkedIndividuals: number;
-  totalRelationships: number;
-  generationsSpan: number;
-  caste?: string;
-  subCaste?: string;
-  nativeOrigins?: string[];
-}
-
-export interface FamilyDataset {
-  appTitle: string;
-  version: string;
-  summary: DatasetSummary;
-  branches: Branch[];
-  individuals: Individual[];
+  ancestorRoot?: string;
+  keyMembers?: string[];
 }
 
 export interface SearchMatch {

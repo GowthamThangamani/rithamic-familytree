@@ -1,37 +1,59 @@
-import { Branch, DatasetSummary, FamilyDataset, Individual, SearchMatch } from '../types/index.ts';
+import { Branch, Individual, SearchMatch } from '../types/index.ts';
+import datasetJson from '../family_tree_dataset.json';
 
 class DataService {
-  private dataset: FamilyDataset | null = null;
   private individualsMap = new Map<number, Individual>();
   public branches: Branch[] = [];
-  public summary: DatasetSummary | null = null;
   public isLoaded = false;
 
-  async load(): Promise<void> {
+  load(): void {
     if (this.isLoaded) return;
+    
     try {
-      const response = await fetch('./family_tree_dataset.json');
-      this.dataset = await response.json();
-      this.summary = this.dataset?.summary || null;
-      this.branches = this.dataset?.branches || [];
+      const rawData = datasetJson as any;
+      this.branches = rawData.branches || [];
 
-      if (this.dataset && Array.isArray(this.dataset.individuals)) {
-        this.dataset.individuals.forEach(ind => {
-          this.individualsMap.set(ind.id, ind);
-        });
-      }
+      const rawList: any[] = rawData.persons || rawData.individuals || [];
+
+      rawList.forEach((p: any) => {
+        const ind: Individual = {
+          id: p.id,
+          fullName: p.fullName,
+          tamilName: p.tamilName || null,
+          gender: p.gender && p.gender.toLowerCase() === 'female' ? 'female' : 'male',
+          generation: p.identityClues?.generationLevel || p.generation || 1,
+          isLiving: Boolean(p.isLiving),
+          birthYear: p.dob ? p.dob.substring(0, 4) : (p.birthYear || null),
+          passingYear: p.dod ? p.dod.substring(0, 4) : (p.passingYear || null),
+          nativePlace: p.nativePlace || 'Kangayam, Tamil Nadu',
+          branch: p.identityClues?.branchName || p.branch || 'Main Lineage',
+          contact: p.contacts && p.contacts.length > 0 ? p.contacts[0].value : (p.contact || null),
+          address: p.addresses && p.addresses.length > 0 ? p.addresses[0].value : (p.address || null),
+          occupation: p.occupation || null,
+          notes: p.identityClues?.searchDescriptor || p.notes || '',
+          parents: p.parents || [],
+          spouses: p.spouses || [],
+          children: p.children || [],
+          siblings: p.siblings || [],
+          identityClues: p.identityClues
+        };
+
+        this.individualsMap.set(ind.id, ind);
+      });
 
       this.isLoaded = true;
     } catch (err) {
-      console.error("Failed to load family_tree_dataset.json:", err);
+      console.error("Failed to load family dataset:", err);
     }
   }
 
   getAllIndividuals(): Individual[] {
+    if (!this.isLoaded) this.load();
     return Array.from(this.individualsMap.values());
   }
 
   getIndividual(id: number | string): Individual | null {
+    if (!this.isLoaded) this.load();
     return this.individualsMap.get(Number(id)) || null;
   }
 
@@ -55,8 +77,13 @@ class DataService {
 
   getSiblings(id: number | string): Individual[] {
     const person = this.getIndividual(id);
-    if (!person || !person.parents || person.parents.length === 0) return [];
+    if (!person) return [];
 
+    if (person.siblings && person.siblings.length > 0) {
+      return person.siblings.map(sid => this.getIndividual(sid)).filter((s): s is Individual => Boolean(s));
+    }
+
+    if (!person.parents || person.parents.length === 0) return [];
     const siblingIds = new Set<number>();
     person.parents.forEach(pid => {
       const parent = this.getIndividual(pid);
@@ -113,6 +140,7 @@ class DataService {
   }
 
   search(query: string): SearchMatch[] {
+    if (!this.isLoaded) this.load();
     if (!query || query.trim().length === 0) return [];
     const q = query.trim().toLowerCase();
 
@@ -122,13 +150,14 @@ class DataService {
       const tamilMatch = ind.tamilName && ind.tamilName.includes(q);
       const placeMatch = ind.nativePlace && ind.nativePlace.toLowerCase().includes(q);
       const notesMatch = ind.notes && ind.notes.toLowerCase().includes(q);
+      const clueMatch = ind.identityClues?.searchDescriptor && ind.identityClues.searchDescriptor.toLowerCase().includes(q);
 
-      if (nameMatch || tamilMatch || placeMatch || notesMatch) {
+      if (nameMatch || tamilMatch || placeMatch || notesMatch || clueMatch) {
         const parents = this.getParents(ind.id);
         const spouses = this.getSpouses(ind.id);
 
-        let parentClue = '';
-        if (parents.length > 0) {
+        let parentClue = ind.identityClues?.parentSpouseSummary || '';
+        if (!parentClue && parents.length > 0) {
           const prefix = ind.gender === 'male' ? 'S/o' : 'D/o';
           parentClue = `${prefix} ${parents.map(p => p.fullName.split(' ')[0]).join(' & ')}`;
         }
@@ -139,9 +168,11 @@ class DataService {
           spouseClue = `${prefix} ${spouses.map(s => s.fullName.split(' ')[0]).join(', ')}`;
         }
 
-        const lifespan = ind.isLiving
-          ? (ind.birthYear ? `b. ${ind.birthYear}` : 'Living')
-          : `${ind.birthYear || '?'} – ${ind.passingYear || 'Deceased'}`;
+        const lifespan = ind.identityClues?.lifespanText || (
+          ind.isLiving
+            ? (ind.birthYear ? `b. ${ind.birthYear}` : 'Living')
+            : `${ind.birthYear || '?'} – ${ind.passingYear || 'Deceased'}`
+        );
 
         matches.push({
           individual: ind,
@@ -158,6 +189,7 @@ class DataService {
   }
 
   getGenerationsMap(): Map<number, Individual[]> {
+    if (!this.isLoaded) this.load();
     const map = new Map<number, Individual[]>();
     for (let g = 1; g <= 6; g++) map.set(g, []);
 

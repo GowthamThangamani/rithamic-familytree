@@ -9,8 +9,8 @@ export class TreeRenderer {
   private onNodeSelect: (person: Individual) => void;
 
   public zoom = 1;
-  public panX = 0;
-  public panY = 0;
+  public panX = 40;
+  public panY = 40;
   private isDragging = false;
   private startX = 0;
   private startY = 0;
@@ -83,8 +83,8 @@ export class TreeRenderer {
 
   resetView(): void {
     this.zoom = 1;
-    this.panX = 0;
-    this.panY = 0;
+    this.panX = 40;
+    this.panY = 40;
     this.updateTransform();
   }
 
@@ -116,16 +116,20 @@ export class TreeRenderer {
     const treeWrapper = document.createElement('div');
     treeWrapper.className = 'hierarchy-container';
 
+    let renderedRowsCount = 0;
+
     for (let gen = 1; gen <= 6; gen++) {
       if (this.filterGeneration !== 'ALL' && Number(this.filterGeneration) !== gen) continue;
 
       const members = genMap.get(gen) || [];
       const filteredMembers = members.filter(m => {
         if (this.filterBranch === 'ALL') return true;
-        return m.branch && m.branch.includes(this.filterBranch);
+        const b = (m.branch || '').toLowerCase();
+        return b.includes(this.filterBranch.toLowerCase());
       });
 
       if (filteredMembers.length === 0) continue;
+      renderedRowsCount++;
 
       const row = document.createElement('div');
       row.className = 'generation-row';
@@ -144,6 +148,14 @@ export class TreeRenderer {
       });
 
       treeWrapper.appendChild(row);
+    }
+
+    if (renderedRowsCount === 0) {
+      treeWrapper.innerHTML = `
+        <div style="padding: 40px; color: #94a3b8; font-size: 15px; text-align: center;">
+          No family members found for the selected branch/generation filter.
+        </div>
+      `;
     }
 
     this.canvas.appendChild(treeWrapper);
@@ -273,9 +285,9 @@ export class TreeRenderer {
   private getBranchClass(branchName: string): string {
     if (!branchName) return 'branch-default';
     if (branchName.includes('Velusamy')) return 'branch-velusamy';
-    if (branchName.includes('Anna Anban')) return 'branch-annan';
+    if (branchName.includes('Anna Anban') || branchName.includes('Anna Anpan')) return 'branch-annan';
     if (branchName.includes('Kandasamy')) return 'branch-kandasamy';
-    if (branchName.includes('Palani Vel')) return 'branch-palanivel';
+    if (branchName.includes('Palani Vel') || branchName.includes('Palanivel')) return 'branch-palanivel';
     return 'branch-default';
   }
 }

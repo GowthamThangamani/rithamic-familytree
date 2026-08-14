@@ -1,23 +1,21 @@
-// Dataset & Genealogy Graph Traversal Service
-class DataService {
-  constructor() {
-    this.dataset = null;
-    this.individualsMap = new Map();
-    this.branches = [];
-    this.summary = {};
-    this.isLoaded = false;
-  }
+import { Branch, DatasetSummary, FamilyDataset, Individual, SearchMatch } from '../types/index.ts';
 
-  async load() {
+class DataService {
+  private dataset: FamilyDataset | null = null;
+  private individualsMap = new Map<number, Individual>();
+  public branches: Branch[] = [];
+  public summary: DatasetSummary | null = null;
+  public isLoaded = false;
+
+  async load(): Promise<void> {
     if (this.isLoaded) return;
     try {
       const response = await fetch('./family_tree_dataset.json');
       this.dataset = await response.json();
-      this.summary = this.dataset.summary || {};
-      this.branches = this.dataset.branches || [];
+      this.summary = this.dataset?.summary || null;
+      this.branches = this.dataset?.branches || [];
 
-      // Map individuals by ID
-      if (Array.isArray(this.dataset.individuals)) {
+      if (this.dataset && Array.isArray(this.dataset.individuals)) {
         this.dataset.individuals.forEach(ind => {
           this.individualsMap.set(ind.id, ind);
         });
@@ -29,37 +27,37 @@ class DataService {
     }
   }
 
-  getAllIndividuals() {
+  getAllIndividuals(): Individual[] {
     return Array.from(this.individualsMap.values());
   }
 
-  getIndividual(id) {
+  getIndividual(id: number | string): Individual | null {
     return this.individualsMap.get(Number(id)) || null;
   }
 
-  getParents(id) {
+  getParents(id: number | string): Individual[] {
     const person = this.getIndividual(id);
     if (!person || !person.parents) return [];
-    return person.parents.map(pid => this.getIndividual(pid)).filter(Boolean);
+    return person.parents.map(pid => this.getIndividual(pid)).filter((p): p is Individual => Boolean(p));
   }
 
-  getChildren(id) {
+  getChildren(id: number | string): Individual[] {
     const person = this.getIndividual(id);
     if (!person || !person.children) return [];
-    return person.children.map(cid => this.getIndividual(cid)).filter(Boolean);
+    return person.children.map(cid => this.getIndividual(cid)).filter((c): c is Individual => Boolean(c));
   }
 
-  getSpouses(id) {
+  getSpouses(id: number | string): Individual[] {
     const person = this.getIndividual(id);
     if (!person || !person.spouses) return [];
-    return person.spouses.map(sid => this.getIndividual(sid)).filter(Boolean);
+    return person.spouses.map(sid => this.getIndividual(sid)).filter((s): s is Individual => Boolean(s));
   }
 
-  getSiblings(id) {
+  getSiblings(id: number | string): Individual[] {
     const person = this.getIndividual(id);
     if (!person || !person.parents || person.parents.length === 0) return [];
-    
-    const siblingIds = new Set();
+
+    const siblingIds = new Set<number>();
     person.parents.forEach(pid => {
       const parent = this.getIndividual(pid);
       if (parent && parent.children) {
@@ -69,16 +67,16 @@ class DataService {
       }
     });
 
-    return Array.from(siblingIds).map(sid => this.getIndividual(sid)).filter(Boolean);
+    return Array.from(siblingIds).map(sid => this.getIndividual(sid)).filter((s): s is Individual => Boolean(s));
   }
 
-  getAncestors(id, maxDepth = 6) {
-    const ancestors = [];
-    const queue = [{ id, depth: 0 }];
-    const visited = new Set([id]);
+  getAncestors(id: number | string, maxDepth = 6): Individual[] {
+    const ancestors: Individual[] = [];
+    const queue: { id: number; depth: number }[] = [{ id: Number(id), depth: 0 }];
+    const visited = new Set<number>([Number(id)]);
 
     while (queue.length > 0) {
-      const current = queue.shift();
+      const current = queue.shift()!;
       if (current.depth >= maxDepth) continue;
 
       const parents = this.getParents(current.id);
@@ -93,13 +91,13 @@ class DataService {
     return ancestors;
   }
 
-  getDescendants(id, maxDepth = 6) {
-    const descendants = [];
-    const queue = [{ id, depth: 0 }];
-    const visited = new Set([id]);
+  getDescendants(id: number | string, maxDepth = 6): Individual[] {
+    const descendants: Individual[] = [];
+    const queue: { id: number; depth: number }[] = [{ id: Number(id), depth: 0 }];
+    const visited = new Set<number>([Number(id)]);
 
     while (queue.length > 0) {
-      const current = queue.shift();
+      const current = queue.shift()!;
       if (current.depth >= maxDepth) continue;
 
       const children = this.getChildren(current.id);
@@ -114,12 +112,11 @@ class DataService {
     return descendants;
   }
 
-  // Smart Search with Disambiguation Clues
-  search(query) {
+  search(query: string): SearchMatch[] {
     if (!query || query.trim().length === 0) return [];
     const q = query.trim().toLowerCase();
 
-    const matches = [];
+    const matches: SearchMatch[] = [];
     for (const ind of this.individualsMap.values()) {
       const nameMatch = ind.fullName.toLowerCase().includes(q);
       const tamilMatch = ind.tamilName && ind.tamilName.includes(q);
@@ -127,7 +124,6 @@ class DataService {
       const notesMatch = ind.notes && ind.notes.toLowerCase().includes(q);
 
       if (nameMatch || tamilMatch || placeMatch || notesMatch) {
-        // Build identity clue
         const parents = this.getParents(ind.id);
         const spouses = this.getSpouses(ind.id);
 
@@ -143,8 +139,8 @@ class DataService {
           spouseClue = `${prefix} ${spouses.map(s => s.fullName.split(' ')[0]).join(', ')}`;
         }
 
-        const lifespan = ind.isLiving 
-          ? (ind.birthYear ? `b. ${ind.birthYear}` : 'Living') 
+        const lifespan = ind.isLiving
+          ? (ind.birthYear ? `b. ${ind.birthYear}` : 'Living')
           : `${ind.birthYear || '?'} – ${ind.passingYear || 'Deceased'}`;
 
         matches.push({
@@ -161,14 +157,14 @@ class DataService {
     return matches.slice(0, 15);
   }
 
-  getGenerationsMap() {
-    const map = new Map();
+  getGenerationsMap(): Map<number, Individual[]> {
+    const map = new Map<number, Individual[]>();
     for (let g = 1; g <= 6; g++) map.set(g, []);
 
     for (const ind of this.individualsMap.values()) {
       const gen = ind.generation || 1;
       if (!map.has(gen)) map.set(gen, []);
-      map.get(gen).push(ind);
+      map.get(gen)!.push(ind);
     }
     return map;
   }

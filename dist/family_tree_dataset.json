@@ -1,0 +1,2779 @@
+{
+  "appTitle": "Rithamic Family Tree",
+  "version": "2.0.0",
+  "summary": {
+    "totalIndividuals": 60,
+    "activeLinkedIndividuals": 51,
+    "totalRelationships": 51,
+    "generationsSpan": 6,
+    "caste": "Kongu Vellar Kounder",
+    "subCaste": "Venduvan kulam",
+    "nativeOrigins": [
+      "Kangayam, Tirupur District, Tamil Nadu"
+    ]
+  },
+  "branches": [
+    {
+      "branchId": "BRANCH_VELUSAMY",
+      "name": "Velusamy Kounder & Chellamal Lineage",
+      "ancestorRoot": "Periya Pannai (#19) -> Thangamani Thata (#27) -> Velusamy Kounder (#6)",
+      "keyMembers": [
+        "Gowtham Thangamani (#1)",
+        "Thangamani V (#2)",
+        "Selva Rani (#3)",
+        "Kanimozhi (#4)",
+        "Mallika (#7)"
+      ]
+    },
+    {
+      "branchId": "BRANCH_ANNA_ANBAN",
+      "name": "Anna Anban Appa & Annan Anban Lineage",
+      "ancestorRoot": "Periya Pannai (#19) -> Anna Anpan Thata (#20) -> Anna Anban Appa (#21)",
+      "keyMembers": [
+        "Annan Anban (#22)",
+        "Athithanambi (#42)",
+        "A P Velusamy (#45)",
+        "Saritha V (#48)",
+        "Athvikh (#49)"
+      ]
+    },
+    {
+      "branchId": "BRANCH_KANDASAMY",
+      "name": "Kandasamy Gounder & Duraisamy Lineage",
+      "ancestorRoot": "Periya Pannai (#19) -> Anna Anpan Thata (#20) -> Kandasamy Gounder (#53)",
+      "keyMembers": [
+        "Duraisamy K (#56)",
+        "Suthir D (#58)",
+        "Kathiresan D (#61)",
+        "Kayal S P (#60)"
+      ]
+    },
+    {
+      "branchId": "BRANCH_PALANIVEL",
+      "name": "Palani Vel Appa & Kumaran Lineage",
+      "ancestorRoot": "Periya Pannai (#19) -> Thangamani Thata (#27) -> Palani Vel Appa (#23)",
+      "keyMembers": [
+        "Palanivel (#24)",
+        "Kumaran (#26)",
+        "Madhu (#25)",
+        "Kumaran Daughter (#38)"
+      ]
+    }
+  ],
+  "persons": [
+    {
+      "id": 1,
+      "fullName": "Gowtham Thangamani",
+      "gender": "Male",
+      "dob": "1993-05-03",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Kangayam, Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [
+        {
+          "type": "phone",
+          "value": "+91 9488202649",
+          "privacy": "confidential_living"
+        }
+      ],
+      "addresses": [
+        {
+          "type": "home",
+          "value": "23/2, Sakthi Nagar, Dharapuram Road, Kangayam - 638701",
+          "privacy": "confidential_living"
+        }
+      ],
+      "parents": [
+        2
+      ],
+      "spouses": [],
+      "children": [],
+      "siblings": [
+        4
+      ],
+      "identityClues": {
+        "searchDescriptor": "Gowtham Thangamani (S/o Thangamani V • b. 1993 (~33 yrs))",
+        "parentSpouseSummary": "S/o Thangamani V",
+        "lifespanText": "b. 1993 (~33 yrs)",
+        "branchName": "",
+        "generationLevel": 1
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 2,
+      "fullName": "Thangamani V",
+      "gender": "Male",
+      "dob": "1964-05-10",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Kangayam, Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [
+        {
+          "type": "phone",
+          "value": "+91 9443202648",
+          "privacy": "confidential_living"
+        },
+        {
+          "type": "phone",
+          "value": "+91 6379353138",
+          "privacy": "confidential_living"
+        }
+      ],
+      "addresses": [],
+      "parents": [
+        5
+      ],
+      "spouses": [
+        {
+          "spouseId": 3,
+          "spouseName": "Selva Rani",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [
+        1,
+        4
+      ],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "Thangamani V (S/o Chellamal | H/o Selva Rani • b. 1964 (~62 yrs))",
+        "parentSpouseSummary": "S/o Chellamal | H/o Selva Rani",
+        "lifespanText": "b. 1964 (~62 yrs)",
+        "branchName": "",
+        "generationLevel": 1
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 3,
+      "fullName": "Selva Rani",
+      "gender": "Female",
+      "dob": "1964-05-10",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Kangayam, Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [
+        {
+          "type": "phone",
+          "value": "+91 9445502648",
+          "privacy": "confidential_living"
+        }
+      ],
+      "addresses": [],
+      "parents": [],
+      "spouses": [
+        {
+          "spouseId": 2,
+          "spouseName": "Thangamani V",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "Selva Rani (W/o Thangamani V • b. 1964 (~62 yrs))",
+        "parentSpouseSummary": "W/o Thangamani V",
+        "lifespanText": "b. 1964 (~62 yrs)",
+        "branchName": "",
+        "generationLevel": 1
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 4,
+      "fullName": "Kanimozhi",
+      "gender": "Female",
+      "dob": "1996-09-09",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Kangayam, Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [
+        {
+          "type": "phone",
+          "value": "+91 9488202648",
+          "privacy": "confidential_living"
+        }
+      ],
+      "addresses": [],
+      "parents": [
+        2
+      ],
+      "spouses": [
+        {
+          "spouseId": 16,
+          "spouseName": "Santhos aka sampath",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [
+        52
+      ],
+      "siblings": [
+        1
+      ],
+      "identityClues": {
+        "searchDescriptor": "Kanimozhi (D/o Thangamani V | W/o Santhos aka sampath • b. 1996 (~30 yrs))",
+        "parentSpouseSummary": "D/o Thangamani V | W/o Santhos aka sampath",
+        "lifespanText": "b. 1996 (~30 yrs)",
+        "branchName": "",
+        "generationLevel": 1
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 5,
+      "fullName": "Chellamal",
+      "gender": "Female",
+      "dob": "1937-05-03",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [],
+      "spouses": [
+        {
+          "spouseId": 6,
+          "spouseName": "Velusamy Kounder",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [
+        2
+      ],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "Chellamal (W/o Velusamy Kounder • b. 1937 (~89 yrs) • Velusamy Kounder Lineage)",
+        "parentSpouseSummary": "W/o Velusamy Kounder",
+        "lifespanText": "b. 1937 (~89 yrs)",
+        "branchName": "Velusamy Kounder Lineage",
+        "generationLevel": 3
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 6,
+      "fullName": "Velusamy Kounder",
+      "gender": "Male",
+      "dob": "1927-05-10",
+      "dod": null,
+      "isLiving": false,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        27
+      ],
+      "spouses": [
+        {
+          "spouseId": 5,
+          "spouseName": "Chellamal",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [
+        7
+      ],
+      "siblings": [
+        23,
+        36
+      ],
+      "identityClues": {
+        "searchDescriptor": "Velusamy Kounder (S/o thangamani thata | H/o Chellamal • b. 1927 • Velusamy Kounder Lineage)",
+        "parentSpouseSummary": "S/o thangamani thata | H/o Chellamal",
+        "lifespanText": "b. 1927",
+        "branchName": "Velusamy Kounder Lineage",
+        "generationLevel": 3
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 7,
+      "fullName": "Mallika",
+      "gender": "Female",
+      "dob": "1962-05-03",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        6
+      ],
+      "spouses": [
+        {
+          "spouseId": 8,
+          "spouseName": "Nataraj",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [
+        9,
+        12
+      ],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "Mallika (D/o Velusamy Kounder | W/o Nataraj • b. 1962 (~64 yrs) • Velusamy Kounder Lineage)",
+        "parentSpouseSummary": "D/o Velusamy Kounder | W/o Nataraj",
+        "lifespanText": "b. 1962 (~64 yrs)",
+        "branchName": "Velusamy Kounder Lineage",
+        "generationLevel": 4
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 8,
+      "fullName": "Nataraj",
+      "gender": "Male",
+      "dob": "1957-05-04",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [],
+      "spouses": [
+        {
+          "spouseId": 7,
+          "spouseName": "Mallika",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "Nataraj (H/o Mallika • b. 1957 (~69 yrs) • Velusamy Kounder Lineage)",
+        "parentSpouseSummary": "H/o Mallika",
+        "lifespanText": "b. 1957 (~69 yrs)",
+        "branchName": "Velusamy Kounder Lineage",
+        "generationLevel": 4
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 9,
+      "fullName": "Sudha",
+      "gender": "Female",
+      "dob": "1985-01-01",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        7
+      ],
+      "spouses": [
+        {
+          "spouseId": 10,
+          "spouseName": "Venkadesh",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [],
+      "siblings": [
+        12
+      ],
+      "identityClues": {
+        "searchDescriptor": "Sudha (D/o Mallika | W/o Venkadesh • b. 1985 (~41 yrs) • Velusamy Kounder Lineage)",
+        "parentSpouseSummary": "D/o Mallika | W/o Venkadesh",
+        "lifespanText": "b. 1985 (~41 yrs)",
+        "branchName": "Velusamy Kounder Lineage",
+        "generationLevel": 5
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 10,
+      "fullName": "Venkadesh",
+      "gender": "Male",
+      "dob": "1981-01-01",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [],
+      "spouses": [
+        {
+          "spouseId": 9,
+          "spouseName": "Sudha",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [
+        11
+      ],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "Venkadesh (H/o Sudha • b. 1981 (~45 yrs) • Velusamy Kounder Lineage)",
+        "parentSpouseSummary": "H/o Sudha",
+        "lifespanText": "b. 1981 (~45 yrs)",
+        "branchName": "Velusamy Kounder Lineage",
+        "generationLevel": 5
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 11,
+      "fullName": "Vaishnu",
+      "gender": "Male",
+      "dob": "2000-01-01",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        10
+      ],
+      "spouses": [],
+      "children": [],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "Vaishnu (S/o Venkadesh • b. 2000 (~26 yrs))",
+        "parentSpouseSummary": "S/o Venkadesh",
+        "lifespanText": "b. 2000 (~26 yrs)",
+        "branchName": "",
+        "generationLevel": 1
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 12,
+      "fullName": "Subha",
+      "gender": "Female",
+      "dob": "1988-01-01",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        7
+      ],
+      "spouses": [
+        {
+          "spouseId": 13,
+          "spouseName": "Selva",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [],
+      "siblings": [
+        9
+      ],
+      "identityClues": {
+        "searchDescriptor": "Subha (D/o Mallika | W/o Selva • b. 1988 (~38 yrs) • Velusamy Kounder Lineage)",
+        "parentSpouseSummary": "D/o Mallika | W/o Selva",
+        "lifespanText": "b. 1988 (~38 yrs)",
+        "branchName": "Velusamy Kounder Lineage",
+        "generationLevel": 5
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 13,
+      "fullName": "Selva",
+      "gender": "Male",
+      "dob": "1987-01-01",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [],
+      "spouses": [
+        {
+          "spouseId": 12,
+          "spouseName": "Subha",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [
+        15,
+        14
+      ],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "Selva (H/o Subha • b. 1987 (~39 yrs) • Velusamy Kounder Lineage)",
+        "parentSpouseSummary": "H/o Subha",
+        "lifespanText": "b. 1987 (~39 yrs)",
+        "branchName": "Velusamy Kounder Lineage",
+        "generationLevel": 5
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 14,
+      "fullName": "Pranavu",
+      "gender": "Male",
+      "dob": "2001-01-01",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        13
+      ],
+      "spouses": [],
+      "children": [],
+      "siblings": [
+        15
+      ],
+      "identityClues": {
+        "searchDescriptor": "Pranavu (S/o Selva • b. 2001 (~25 yrs))",
+        "parentSpouseSummary": "S/o Selva",
+        "lifespanText": "b. 2001 (~25 yrs)",
+        "branchName": "",
+        "generationLevel": 1
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 15,
+      "fullName": "Subha papa",
+      "gender": "Female",
+      "dob": "2002-01-01",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        13
+      ],
+      "spouses": [],
+      "children": [],
+      "siblings": [
+        14
+      ],
+      "identityClues": {
+        "searchDescriptor": "Subha papa (D/o Selva • b. 2002 (~24 yrs))",
+        "parentSpouseSummary": "D/o Selva",
+        "lifespanText": "b. 2002 (~24 yrs)",
+        "branchName": "",
+        "generationLevel": 1
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 16,
+      "fullName": "Santhos aka sampath",
+      "gender": "Female",
+      "dob": "1993-05-05",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [],
+      "spouses": [
+        {
+          "spouseId": 4,
+          "spouseName": "Kanimozhi",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "Santhos aka sampath (W/o Kanimozhi • b. 1993 (~33 yrs))",
+        "parentSpouseSummary": "W/o Kanimozhi",
+        "lifespanText": "b. 1993 (~33 yrs)",
+        "branchName": "",
+        "generationLevel": 1
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 19,
+      "fullName": "periya pannai.",
+      "gender": "Male",
+      "dob": "1900-01-19",
+      "dod": null,
+      "isLiving": false,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [],
+      "spouses": [
+        {
+          "spouseId": 35,
+          "spouseName": "periya panniwife",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [
+        27,
+        20
+      ],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "periya pannai. (H/o periya panniwife • b. 1900 • Periya Pannai Ancestral Root)",
+        "parentSpouseSummary": "H/o periya panniwife",
+        "lifespanText": "b. 1900",
+        "branchName": "Periya Pannai Ancestral Root",
+        "generationLevel": 1
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 20,
+      "fullName": "anna anpan thata",
+      "gender": "Male",
+      "dob": "1910-01-01",
+      "dod": null,
+      "isLiving": false,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        19
+      ],
+      "spouses": [],
+      "children": [
+        21,
+        53,
+        54
+      ],
+      "siblings": [
+        27
+      ],
+      "identityClues": {
+        "searchDescriptor": "anna anpan thata (S/o periya pannai. • b. 1910 • Anna Anpan Thata Branch (Main Lineage))",
+        "parentSpouseSummary": "S/o periya pannai.",
+        "lifespanText": "b. 1910",
+        "branchName": "Anna Anpan Thata Branch (Main Lineage)",
+        "generationLevel": 2
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 21,
+      "fullName": "anna anban appa",
+      "gender": "Male",
+      "dob": "1920-01-01",
+      "dod": null,
+      "isLiving": false,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        20
+      ],
+      "spouses": [],
+      "children": [
+        22,
+        45
+      ],
+      "siblings": [
+        53,
+        54
+      ],
+      "identityClues": {
+        "searchDescriptor": "anna anban appa (S/o anna anpan thata • b. 1920 • Anna Anban Appa Lineage)",
+        "parentSpouseSummary": "S/o anna anpan thata",
+        "lifespanText": "b. 1920",
+        "branchName": "Anna Anban Appa Lineage",
+        "generationLevel": 3
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 22,
+      "fullName": "annan anban",
+      "gender": "Male",
+      "dob": "1920-01-01",
+      "dod": null,
+      "isLiving": false,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        21
+      ],
+      "spouses": [
+        {
+          "spouseId": 41,
+          "spouseName": "Visalatchi",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [
+        42
+      ],
+      "siblings": [
+        45
+      ],
+      "identityClues": {
+        "searchDescriptor": "annan anban (S/o anna anban appa | H/o Visalatchi • b. 1920 • Anna Anban Appa Lineage)",
+        "parentSpouseSummary": "S/o anna anban appa | H/o Visalatchi",
+        "lifespanText": "b. 1920",
+        "branchName": "Anna Anban Appa Lineage",
+        "generationLevel": 4
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 23,
+      "fullName": "palani vel appa",
+      "gender": "Male",
+      "dob": "1990-04-04",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        27
+      ],
+      "spouses": [],
+      "children": [
+        24
+      ],
+      "siblings": [
+        6,
+        36
+      ],
+      "identityClues": {
+        "searchDescriptor": "palani vel appa (S/o thangamani thata • b. 1990 (~36 yrs) • Palani Vel Appa Lineage)",
+        "parentSpouseSummary": "S/o thangamani thata",
+        "lifespanText": "b. 1990 (~36 yrs)",
+        "branchName": "Palani Vel Appa Lineage",
+        "generationLevel": 3
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 24,
+      "fullName": "palanivel ",
+      "gender": "Male",
+      "dob": "1990-01-04",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        23
+      ],
+      "spouses": [],
+      "children": [
+        25,
+        26
+      ],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "palanivel  (S/o palani vel appa • b. 1990 (~36 yrs) • Palani Vel Appa Lineage)",
+        "parentSpouseSummary": "S/o palani vel appa",
+        "lifespanText": "b. 1990 (~36 yrs)",
+        "branchName": "Palani Vel Appa Lineage",
+        "generationLevel": 4
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 25,
+      "fullName": "madhu",
+      "gender": "Female",
+      "dob": "1990-04-05",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        24
+      ],
+      "spouses": [],
+      "children": [],
+      "siblings": [
+        26
+      ],
+      "identityClues": {
+        "searchDescriptor": "madhu (D/o palanivel  • b. 1990 (~36 yrs) • Palani Vel Appa Lineage)",
+        "parentSpouseSummary": "D/o palanivel ",
+        "lifespanText": "b. 1990 (~36 yrs)",
+        "branchName": "Palani Vel Appa Lineage",
+        "generationLevel": 5
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 26,
+      "fullName": "kumaran",
+      "gender": "Male",
+      "dob": "1990-08-01",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        24
+      ],
+      "spouses": [
+        {
+          "spouseId": 39,
+          "spouseName": "kumaran wife",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [
+        38
+      ],
+      "siblings": [
+        25
+      ],
+      "identityClues": {
+        "searchDescriptor": "kumaran (S/o palanivel  | H/o kumaran wife • b. 1990 (~36 yrs) • Palani Vel Appa Lineage)",
+        "parentSpouseSummary": "S/o palanivel  | H/o kumaran wife",
+        "lifespanText": "b. 1990 (~36 yrs)",
+        "branchName": "Palani Vel Appa Lineage",
+        "generationLevel": 5
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 27,
+      "fullName": "thangamani thata",
+      "gender": "Male",
+      "dob": "1901-01-01",
+      "dod": null,
+      "isLiving": false,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        19
+      ],
+      "spouses": [
+        {
+          "spouseId": 37,
+          "spouseName": "thata partner",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [
+        6,
+        23,
+        36
+      ],
+      "siblings": [
+        20
+      ],
+      "identityClues": {
+        "searchDescriptor": "thangamani thata (S/o periya pannai. | H/o thata partner • b. 1901 • Thangamani Thata Branch (Kangayam Lineage))",
+        "parentSpouseSummary": "S/o periya pannai. | H/o thata partner",
+        "lifespanText": "b. 1901",
+        "branchName": "Thangamani Thata Branch (Kangayam Lineage)",
+        "generationLevel": 2
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 28,
+      "fullName": "thangamani patti",
+      "gender": "Female",
+      "dob": "1990-01-01",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [],
+      "spouses": [],
+      "children": [],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "thangamani patti (b. 1990 (~36 yrs))",
+        "parentSpouseSummary": "",
+        "lifespanText": "b. 1990 (~36 yrs)",
+        "branchName": "",
+        "generationLevel": 1
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": true,
+        "duplicateOfId": null,
+        "isActive": false
+      }
+    },
+    {
+      "id": 29,
+      "fullName": "Sudha child 2",
+      "gender": "Male",
+      "dob": null,
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [],
+      "spouses": [],
+      "children": [],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "Sudha child 2 (Historical record)",
+        "parentSpouseSummary": "",
+        "lifespanText": "Historical record",
+        "branchName": "",
+        "generationLevel": 1
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": true,
+        "duplicateOfId": null,
+        "isActive": false
+      }
+    },
+    {
+      "id": 30,
+      "fullName": "Sudha child 2",
+      "gender": "Male",
+      "dob": null,
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [],
+      "spouses": [],
+      "children": [],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "Sudha child 2 (Historical record)",
+        "parentSpouseSummary": "",
+        "lifespanText": "Historical record",
+        "branchName": "",
+        "generationLevel": 1
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": true,
+        "duplicateOfId": null,
+        "isActive": false
+      }
+    },
+    {
+      "id": 31,
+      "fullName": "Priya panni wife",
+      "gender": "Male",
+      "dob": null,
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [],
+      "spouses": [],
+      "children": [],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "Priya panni wife (Historical record)",
+        "parentSpouseSummary": "",
+        "lifespanText": "Historical record",
+        "branchName": "",
+        "generationLevel": 1
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": true,
+        "duplicateOfId": null,
+        "isActive": false
+      }
+    },
+    {
+      "id": 32,
+      "fullName": "Priya panni wife",
+      "gender": "Male",
+      "dob": null,
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [],
+      "spouses": [],
+      "children": [],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "Priya panni wife (Historical record)",
+        "parentSpouseSummary": "",
+        "lifespanText": "Historical record",
+        "branchName": "",
+        "generationLevel": 1
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": true,
+        "duplicateOfId": null,
+        "isActive": false
+      }
+    },
+    {
+      "id": 33,
+      "fullName": "periyapanni wife",
+      "gender": "Male",
+      "dob": null,
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [],
+      "spouses": [],
+      "children": [],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "periyapanni wife (Historical record)",
+        "parentSpouseSummary": "",
+        "lifespanText": "Historical record",
+        "branchName": "",
+        "generationLevel": 1
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": true,
+        "duplicateOfId": null,
+        "isActive": false
+      }
+    },
+    {
+      "id": 34,
+      "fullName": "Thangamani that's wife",
+      "gender": "Female",
+      "dob": null,
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [],
+      "spouses": [],
+      "children": [],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "Thangamani that's wife (Historical record)",
+        "parentSpouseSummary": "",
+        "lifespanText": "Historical record",
+        "branchName": "",
+        "generationLevel": 1
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": true,
+        "duplicateOfId": null,
+        "isActive": false
+      }
+    },
+    {
+      "id": 35,
+      "fullName": "periya panniwife",
+      "gender": "Female",
+      "dob": null,
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [],
+      "spouses": [
+        {
+          "spouseId": 19,
+          "spouseName": "periya pannai.",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "periya panniwife (W/o periya pannai. • Historical record • Periya Pannai Ancestral Root)",
+        "parentSpouseSummary": "W/o periya pannai.",
+        "lifespanText": "Historical record",
+        "branchName": "Periya Pannai Ancestral Root",
+        "generationLevel": 1
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 36,
+      "fullName": "that's child",
+      "gender": "Female",
+      "dob": null,
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        27
+      ],
+      "spouses": [],
+      "children": [],
+      "siblings": [
+        6,
+        23
+      ],
+      "identityClues": {
+        "searchDescriptor": "that's child (D/o thangamani thata • Historical record • Thangamani Thata Branch (Kangayam Lineage))",
+        "parentSpouseSummary": "D/o thangamani thata",
+        "lifespanText": "Historical record",
+        "branchName": "Thangamani Thata Branch (Kangayam Lineage)",
+        "generationLevel": 3
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 37,
+      "fullName": "thata partner",
+      "gender": "Female",
+      "dob": null,
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [],
+      "spouses": [
+        {
+          "spouseId": 27,
+          "spouseName": "thangamani thata",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "thata partner (W/o thangamani thata • Historical record • Thangamani Thata Branch (Kangayam Lineage))",
+        "parentSpouseSummary": "W/o thangamani thata",
+        "lifespanText": "Historical record",
+        "branchName": "Thangamani Thata Branch (Kangayam Lineage)",
+        "generationLevel": 2
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 38,
+      "fullName": "kumaran daughter",
+      "gender": "Female",
+      "dob": null,
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        26
+      ],
+      "spouses": [],
+      "children": [],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "kumaran daughter (D/o kumaran • Historical record • Palani Vel Appa Lineage)",
+        "parentSpouseSummary": "D/o kumaran",
+        "lifespanText": "Historical record",
+        "branchName": "Palani Vel Appa Lineage",
+        "generationLevel": 6
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 39,
+      "fullName": "kumaran wife",
+      "gender": "Female",
+      "dob": null,
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [],
+      "spouses": [
+        {
+          "spouseId": 26,
+          "spouseName": "kumaran",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "kumaran wife (W/o kumaran • Historical record • Palani Vel Appa Lineage)",
+        "parentSpouseSummary": "W/o kumaran",
+        "lifespanText": "Historical record",
+        "branchName": "Palani Vel Appa Lineage",
+        "generationLevel": 5
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 40,
+      "fullName": "kumaran father",
+      "gender": "Male",
+      "dob": null,
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [],
+      "spouses": [],
+      "children": [],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "kumaran father (Historical record)",
+        "parentSpouseSummary": "",
+        "lifespanText": "Historical record",
+        "branchName": "",
+        "generationLevel": 1
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": true,
+        "duplicateOfId": null,
+        "isActive": false
+      }
+    },
+    {
+      "id": 41,
+      "fullName": "Visalatchi",
+      "gender": "Female",
+      "dob": "1962-04-09",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [],
+      "spouses": [
+        {
+          "spouseId": 22,
+          "spouseName": "annan anban",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "Visalatchi (W/o annan anban • b. 1962 (~64 yrs) • Anna Anban Appa Lineage)",
+        "parentSpouseSummary": "W/o annan anban",
+        "lifespanText": "b. 1962 (~64 yrs)",
+        "branchName": "Anna Anban Appa Lineage",
+        "generationLevel": 4
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 42,
+      "fullName": "ATHITHANAMBI",
+      "gender": "Female",
+      "dob": "1988-04-11",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        22
+      ],
+      "spouses": [
+        {
+          "spouseId": 43,
+          "spouseName": "Divya Darshini",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [
+        44
+      ],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "ATHITHANAMBI (D/o annan anban | W/o Divya Darshini • b. 1988 (~38 yrs) • Anna Anban Appa Lineage)",
+        "parentSpouseSummary": "D/o annan anban | W/o Divya Darshini",
+        "lifespanText": "b. 1988 (~38 yrs)",
+        "branchName": "Anna Anban Appa Lineage",
+        "generationLevel": 5
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 43,
+      "fullName": "Divya Darshini",
+      "gender": "Male",
+      "dob": "1991-01-10",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [],
+      "spouses": [
+        {
+          "spouseId": 42,
+          "spouseName": "ATHITHANAMBI",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "Divya Darshini (H/o ATHITHANAMBI • b. 1991 (~35 yrs) • Anna Anban Appa Lineage)",
+        "parentSpouseSummary": "H/o ATHITHANAMBI",
+        "lifespanText": "b. 1991 (~35 yrs)",
+        "branchName": "Anna Anban Appa Lineage",
+        "generationLevel": 5
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 44,
+      "fullName": "C A Venba",
+      "gender": "Female",
+      "dob": "2018-12-18",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        42
+      ],
+      "spouses": [],
+      "children": [],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "C A Venba (D/o ATHITHANAMBI • b. 2018 (~8 yrs) • Anna Anban Appa Lineage)",
+        "parentSpouseSummary": "D/o ATHITHANAMBI",
+        "lifespanText": "b. 2018 (~8 yrs)",
+        "branchName": "Anna Anban Appa Lineage",
+        "generationLevel": 6
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 45,
+      "fullName": "A P Velusamy",
+      "gender": "Male",
+      "dob": null,
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        21
+      ],
+      "spouses": [
+        {
+          "spouseId": 46,
+          "spouseName": "Chinnathal v",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [
+        47,
+        48
+      ],
+      "siblings": [
+        22
+      ],
+      "identityClues": {
+        "searchDescriptor": "A P Velusamy (S/o anna anban appa | H/o Chinnathal v • Historical record • Anna Anban Appa Lineage)",
+        "parentSpouseSummary": "S/o anna anban appa | H/o Chinnathal v",
+        "lifespanText": "Historical record",
+        "branchName": "Anna Anban Appa Lineage",
+        "generationLevel": 4
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 46,
+      "fullName": "Chinnathal v",
+      "gender": "Female",
+      "dob": null,
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [],
+      "spouses": [
+        {
+          "spouseId": 45,
+          "spouseName": "A P Velusamy",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "Chinnathal v (W/o A P Velusamy • Historical record • Anna Anban Appa Lineage)",
+        "parentSpouseSummary": "W/o A P Velusamy",
+        "lifespanText": "Historical record",
+        "branchName": "Anna Anban Appa Lineage",
+        "generationLevel": 4
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 47,
+      "fullName": "Satheesh",
+      "gender": "Male",
+      "dob": "1995-09-20",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        45
+      ],
+      "spouses": [],
+      "children": [],
+      "siblings": [
+        48
+      ],
+      "identityClues": {
+        "searchDescriptor": "Satheesh (S/o A P Velusamy • b. 1995 (~31 yrs) • Anna Anban Appa Lineage)",
+        "parentSpouseSummary": "S/o A P Velusamy",
+        "lifespanText": "b. 1995 (~31 yrs)",
+        "branchName": "Anna Anban Appa Lineage",
+        "generationLevel": 5
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 48,
+      "fullName": "Saritha V",
+      "gender": "Female",
+      "dob": "1990-08-19",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        45
+      ],
+      "spouses": [],
+      "children": [
+        49,
+        50,
+        51
+      ],
+      "siblings": [
+        47
+      ],
+      "identityClues": {
+        "searchDescriptor": "Saritha V (D/o A P Velusamy • b. 1990 (~36 yrs) • Anna Anban Appa Lineage)",
+        "parentSpouseSummary": "D/o A P Velusamy",
+        "lifespanText": "b. 1990 (~36 yrs)",
+        "branchName": "Anna Anban Appa Lineage",
+        "generationLevel": 5
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 49,
+      "fullName": "N S Athvikh",
+      "gender": "Male",
+      "dob": "2015-08-29",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        48
+      ],
+      "spouses": [],
+      "children": [],
+      "siblings": [
+        50,
+        51
+      ],
+      "identityClues": {
+        "searchDescriptor": "N S Athvikh (S/o Saritha V • b. 2015 (~11 yrs) • Anna Anban Appa Lineage)",
+        "parentSpouseSummary": "S/o Saritha V",
+        "lifespanText": "b. 2015 (~11 yrs)",
+        "branchName": "Anna Anban Appa Lineage",
+        "generationLevel": 6
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 50,
+      "fullName": "Athvikh N S",
+      "gender": "Male",
+      "dob": "2015-08-29",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        48
+      ],
+      "spouses": [],
+      "children": [],
+      "siblings": [
+        49,
+        51
+      ],
+      "identityClues": {
+        "searchDescriptor": "Athvikh N S (S/o Saritha V • b. 2015 (~11 yrs) • Anna Anban Appa Lineage)",
+        "parentSpouseSummary": "S/o Saritha V",
+        "lifespanText": "b. 2015 (~11 yrs)",
+        "branchName": "Anna Anban Appa Lineage",
+        "generationLevel": 6
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": 49,
+        "isActive": false
+      }
+    },
+    {
+      "id": 51,
+      "fullName": "Aarunya ",
+      "gender": "Female",
+      "dob": "2017-08-17",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        48
+      ],
+      "spouses": [],
+      "children": [],
+      "siblings": [
+        49,
+        50
+      ],
+      "identityClues": {
+        "searchDescriptor": "Aarunya  (D/o Saritha V • b. 2017 (~9 yrs) • Anna Anban Appa Lineage)",
+        "parentSpouseSummary": "D/o Saritha V",
+        "lifespanText": "b. 2017 (~9 yrs)",
+        "branchName": "Anna Anban Appa Lineage",
+        "generationLevel": 6
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 52,
+      "fullName": "kani baby",
+      "gender": "Male",
+      "dob": null,
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        4
+      ],
+      "spouses": [],
+      "children": [],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "kani baby (S/o Kanimozhi • Historical record)",
+        "parentSpouseSummary": "S/o Kanimozhi",
+        "lifespanText": "Historical record",
+        "branchName": "",
+        "generationLevel": 1
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 53,
+      "fullName": "Kandasamy Gounder",
+      "gender": "Male",
+      "dob": null,
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        20
+      ],
+      "spouses": [
+        {
+          "spouseId": 55,
+          "spouseName": "Chinnathal K",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [
+        56
+      ],
+      "siblings": [
+        21,
+        54
+      ],
+      "identityClues": {
+        "searchDescriptor": "Kandasamy Gounder (S/o anna anpan thata | H/o Chinnathal K • Historical record • Kandasamy Gounder Lineage)",
+        "parentSpouseSummary": "S/o anna anpan thata | H/o Chinnathal K",
+        "lifespanText": "Historical record",
+        "branchName": "Kandasamy Gounder Lineage",
+        "generationLevel": 3
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 54,
+      "fullName": "Sadayappa Gounder",
+      "gender": "Male",
+      "dob": null,
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        20
+      ],
+      "spouses": [],
+      "children": [],
+      "siblings": [
+        21,
+        53
+      ],
+      "identityClues": {
+        "searchDescriptor": "Sadayappa Gounder (S/o anna anpan thata • Historical record • Anna Anpan Thata Branch (Main Lineage))",
+        "parentSpouseSummary": "S/o anna anpan thata",
+        "lifespanText": "Historical record",
+        "branchName": "Anna Anpan Thata Branch (Main Lineage)",
+        "generationLevel": 3
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 55,
+      "fullName": "Chinnathal K",
+      "gender": "Female",
+      "dob": null,
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [],
+      "spouses": [
+        {
+          "spouseId": 53,
+          "spouseName": "Kandasamy Gounder",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "Chinnathal K (W/o Kandasamy Gounder • Historical record • Kandasamy Gounder Lineage)",
+        "parentSpouseSummary": "W/o Kandasamy Gounder",
+        "lifespanText": "Historical record",
+        "branchName": "Kandasamy Gounder Lineage",
+        "generationLevel": 3
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 56,
+      "fullName": "Duraisamy K",
+      "gender": "Male",
+      "dob": "1962-07-03",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        53
+      ],
+      "spouses": [
+        {
+          "spouseId": 57,
+          "spouseName": "Eswari D",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [
+        58,
+        61
+      ],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "Duraisamy K (S/o Kandasamy Gounder | H/o Eswari D • b. 1962 (~64 yrs) • Kandasamy Gounder Lineage)",
+        "parentSpouseSummary": "S/o Kandasamy Gounder | H/o Eswari D",
+        "lifespanText": "b. 1962 (~64 yrs)",
+        "branchName": "Kandasamy Gounder Lineage",
+        "generationLevel": 4
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 57,
+      "fullName": "Eswari D",
+      "gender": "Female",
+      "dob": "1970-06-26",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [],
+      "spouses": [
+        {
+          "spouseId": 56,
+          "spouseName": "Duraisamy K",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "Eswari D (W/o Duraisamy K • b. 1970 (~56 yrs) • Kandasamy Gounder Lineage)",
+        "parentSpouseSummary": "W/o Duraisamy K",
+        "lifespanText": "b. 1970 (~56 yrs)",
+        "branchName": "Kandasamy Gounder Lineage",
+        "generationLevel": 4
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 58,
+      "fullName": "Suthir D",
+      "gender": "Male",
+      "dob": "1991-07-31",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        56
+      ],
+      "spouses": [
+        {
+          "spouseId": 59,
+          "spouseName": "Priyanka S",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [
+        60
+      ],
+      "siblings": [
+        61
+      ],
+      "identityClues": {
+        "searchDescriptor": "Suthir D (S/o Duraisamy K | H/o Priyanka S • b. 1991 (~35 yrs) • Kandasamy Gounder Lineage)",
+        "parentSpouseSummary": "S/o Duraisamy K | H/o Priyanka S",
+        "lifespanText": "b. 1991 (~35 yrs)",
+        "branchName": "Kandasamy Gounder Lineage",
+        "generationLevel": 5
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 59,
+      "fullName": "Priyanka S",
+      "gender": "Female",
+      "dob": "1995-08-31",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [],
+      "spouses": [
+        {
+          "spouseId": 58,
+          "spouseName": "Suthir D",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "Priyanka S (W/o Suthir D • b. 1995 (~31 yrs) • Kandasamy Gounder Lineage)",
+        "parentSpouseSummary": "W/o Suthir D",
+        "lifespanText": "b. 1995 (~31 yrs)",
+        "branchName": "Kandasamy Gounder Lineage",
+        "generationLevel": 5
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 60,
+      "fullName": "Kayal S P",
+      "gender": "Female",
+      "dob": "2020-03-21",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        58
+      ],
+      "spouses": [],
+      "children": [],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "Kayal S P (D/o Suthir D • b. 2020 (~6 yrs) • Kandasamy Gounder Lineage)",
+        "parentSpouseSummary": "D/o Suthir D",
+        "lifespanText": "b. 2020 (~6 yrs)",
+        "branchName": "Kandasamy Gounder Lineage",
+        "generationLevel": 6
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 61,
+      "fullName": "Kathiresan D",
+      "gender": "Male",
+      "dob": "1996-01-22",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [
+        56
+      ],
+      "spouses": [
+        {
+          "spouseId": 62,
+          "spouseName": "Kavi Nivedha K",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [],
+      "siblings": [
+        58
+      ],
+      "identityClues": {
+        "searchDescriptor": "Kathiresan D (S/o Duraisamy K | H/o Kavi Nivedha K • b. 1996 (~30 yrs) • Kandasamy Gounder Lineage)",
+        "parentSpouseSummary": "S/o Duraisamy K | H/o Kavi Nivedha K",
+        "lifespanText": "b. 1996 (~30 yrs)",
+        "branchName": "Kandasamy Gounder Lineage",
+        "generationLevel": 5
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    },
+    {
+      "id": 62,
+      "fullName": "Kavi Nivedha K",
+      "gender": "Female",
+      "dob": "1997-11-01",
+      "dod": null,
+      "isLiving": true,
+      "caste": "Kongu Vellar Kounder",
+      "subCaste": "Venduvan kulam",
+      "nativePlace": "Tamil Nadu",
+      "occupation": null,
+      "photos": [],
+      "contacts": [],
+      "addresses": [],
+      "parents": [],
+      "spouses": [
+        {
+          "spouseId": 61,
+          "spouseName": "Kathiresan D",
+          "order": 1,
+          "nature": "legal_marriage"
+        }
+      ],
+      "children": [],
+      "siblings": [],
+      "identityClues": {
+        "searchDescriptor": "Kavi Nivedha K (W/o Kathiresan D • b. 1997 (~29 yrs) • Kandasamy Gounder Lineage)",
+        "parentSpouseSummary": "W/o Kathiresan D",
+        "lifespanText": "b. 1997 (~29 yrs)",
+        "branchName": "Kandasamy Gounder Lineage",
+        "generationLevel": 5
+      },
+      "metadata": {
+        "isDraftOrPlaceholder": false,
+        "duplicateOfId": null,
+        "isActive": true
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": 1,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 2,
+      "childPersonId": 1,
+      "notes": null
+    },
+    {
+      "id": 4,
+      "type": "spouse",
+      "nature": "legal_marriage",
+      "personAId": 2,
+      "personBId": 3,
+      "notes": null
+    },
+    {
+      "id": 6,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 2,
+      "childPersonId": 4,
+      "notes": null
+    },
+    {
+      "id": 8,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 5,
+      "childPersonId": 2,
+      "notes": null
+    },
+    {
+      "id": 9,
+      "type": "spouse",
+      "nature": "legal_marriage",
+      "personAId": 5,
+      "personBId": 6,
+      "notes": null
+    },
+    {
+      "id": 10,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 6,
+      "childPersonId": 7,
+      "notes": null
+    },
+    {
+      "id": 11,
+      "type": "spouse",
+      "nature": "legal_marriage",
+      "personAId": 7,
+      "personBId": 8,
+      "notes": null
+    },
+    {
+      "id": 12,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 7,
+      "childPersonId": 9,
+      "notes": null
+    },
+    {
+      "id": 13,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 7,
+      "childPersonId": 12,
+      "notes": null
+    },
+    {
+      "id": 14,
+      "type": "spouse",
+      "nature": "legal_marriage",
+      "personAId": 9,
+      "personBId": 10,
+      "notes": null
+    },
+    {
+      "id": 15,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 10,
+      "childPersonId": 11,
+      "notes": null
+    },
+    {
+      "id": 16,
+      "type": "spouse",
+      "nature": "legal_marriage",
+      "personAId": 12,
+      "personBId": 13,
+      "notes": null
+    },
+    {
+      "id": 17,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 13,
+      "childPersonId": 15,
+      "notes": null
+    },
+    {
+      "id": 18,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 13,
+      "childPersonId": 14,
+      "notes": null
+    },
+    {
+      "id": 19,
+      "type": "spouse",
+      "nature": "legal_marriage",
+      "personAId": 16,
+      "personBId": 4,
+      "notes": null
+    },
+    {
+      "id": 20,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 27,
+      "childPersonId": 6,
+      "notes": null
+    },
+    {
+      "id": 22,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 19,
+      "childPersonId": 27,
+      "notes": null
+    },
+    {
+      "id": 23,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 19,
+      "childPersonId": 20,
+      "notes": null
+    },
+    {
+      "id": 24,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 20,
+      "childPersonId": 21,
+      "notes": null
+    },
+    {
+      "id": 25,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 21,
+      "childPersonId": 22,
+      "notes": null
+    },
+    {
+      "id": 26,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 27,
+      "childPersonId": 23,
+      "notes": null
+    },
+    {
+      "id": 27,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 23,
+      "childPersonId": 24,
+      "notes": null
+    },
+    {
+      "id": 28,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 24,
+      "childPersonId": 25,
+      "notes": null
+    },
+    {
+      "id": 29,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 24,
+      "childPersonId": 26,
+      "notes": null
+    },
+    {
+      "id": 33,
+      "type": "spouse",
+      "nature": "legal_marriage",
+      "personAId": 19,
+      "personBId": 35,
+      "notes": null
+    },
+    {
+      "id": 34,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 27,
+      "childPersonId": 36,
+      "notes": null
+    },
+    {
+      "id": 35,
+      "type": "spouse",
+      "nature": "legal_marriage",
+      "personAId": 27,
+      "personBId": 37,
+      "notes": null
+    },
+    {
+      "id": 36,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 26,
+      "childPersonId": 38,
+      "notes": null
+    },
+    {
+      "id": 37,
+      "type": "spouse",
+      "nature": "legal_marriage",
+      "personAId": 26,
+      "personBId": 39,
+      "notes": null
+    },
+    {
+      "id": 39,
+      "type": "spouse",
+      "nature": "legal_marriage",
+      "personAId": 22,
+      "personBId": 41,
+      "notes": null
+    },
+    {
+      "id": 40,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 22,
+      "childPersonId": 42,
+      "notes": null
+    },
+    {
+      "id": 41,
+      "type": "spouse",
+      "nature": "legal_marriage",
+      "personAId": 42,
+      "personBId": 43,
+      "notes": null
+    },
+    {
+      "id": 42,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 42,
+      "childPersonId": 44,
+      "notes": null
+    },
+    {
+      "id": 43,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 21,
+      "childPersonId": 45,
+      "notes": null
+    },
+    {
+      "id": 44,
+      "type": "spouse",
+      "nature": "legal_marriage",
+      "personAId": 45,
+      "personBId": 46,
+      "notes": null
+    },
+    {
+      "id": 45,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 45,
+      "childPersonId": 47,
+      "notes": null
+    },
+    {
+      "id": 46,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 45,
+      "childPersonId": 48,
+      "notes": null
+    },
+    {
+      "id": 47,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 48,
+      "childPersonId": 49,
+      "notes": null
+    },
+    {
+      "id": 48,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 48,
+      "childPersonId": 50,
+      "notes": null
+    },
+    {
+      "id": 49,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 48,
+      "childPersonId": 51,
+      "notes": null
+    },
+    {
+      "id": 50,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 4,
+      "childPersonId": 52,
+      "notes": null
+    },
+    {
+      "id": 51,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 20,
+      "childPersonId": 53,
+      "notes": null
+    },
+    {
+      "id": 52,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 20,
+      "childPersonId": 54,
+      "notes": null
+    },
+    {
+      "id": 53,
+      "type": "spouse",
+      "nature": "legal_marriage",
+      "personAId": 53,
+      "personBId": 55,
+      "notes": null
+    },
+    {
+      "id": 54,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 53,
+      "childPersonId": 56,
+      "notes": null
+    },
+    {
+      "id": 55,
+      "type": "spouse",
+      "nature": "legal_marriage",
+      "personAId": 56,
+      "personBId": 57,
+      "notes": null
+    },
+    {
+      "id": 56,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 56,
+      "childPersonId": 58,
+      "notes": null
+    },
+    {
+      "id": 57,
+      "type": "spouse",
+      "nature": "legal_marriage",
+      "personAId": 58,
+      "personBId": 59,
+      "notes": null
+    },
+    {
+      "id": 58,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 58,
+      "childPersonId": 60,
+      "notes": null
+    },
+    {
+      "id": 59,
+      "type": "parent_child",
+      "nature": "biological",
+      "parentPersonId": 56,
+      "childPersonId": 61,
+      "notes": null
+    },
+    {
+      "id": 60,
+      "type": "spouse",
+      "nature": "legal_marriage",
+      "personAId": 61,
+      "personBId": 62,
+      "notes": null
+    }
+  ]
+}

@@ -1,49 +1,62 @@
-// Authentication & Privacy Service - rithamic-familytree
-import { CONFIG } from './config.js';
-import { trackEvent } from './telemetryService.js';
+import { CONFIG } from '../config/index.ts';
+import { AuthUser, Individual } from '../types/index.ts';
+import { trackEvent } from './telemetryService.ts';
+
+export interface AuthState {
+  isAuthenticated: boolean;
+  user: AuthUser | null;
+  isAdmin: boolean;
+  isEditor: boolean;
+}
+
+type AuthListener = (state: AuthState) => void;
 
 class AuthService {
+  private token: string | null;
+  private user: AuthUser | null;
+  private listeners: AuthListener[] = [];
+
   constructor() {
     this.token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
-    this.user = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_USER) || 'null');
-    this.listeners = [];
+    const userJson = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_USER);
+    this.user = userJson ? JSON.parse(userJson) : null;
   }
 
-  onAuthChange(callback) {
+  onAuthChange(callback: AuthListener): void {
     this.listeners.push(callback);
   }
 
-  notifyListeners() {
-    this.listeners.forEach(cb => cb({
+  private notifyListeners(): void {
+    const state: AuthState = {
       isAuthenticated: this.isAuthenticated(),
       user: this.user,
       isAdmin: this.isAdmin(),
       isEditor: this.isEditor()
-    }));
+    };
+    this.listeners.forEach(cb => cb(state));
   }
 
-  isAuthenticated() {
+  isAuthenticated(): boolean {
     return Boolean(this.token && this.user);
   }
 
-  isAdmin() {
+  isAdmin(): boolean {
     return this.user?.role === 'admin';
   }
 
-  isEditor() {
+  isEditor(): boolean {
     return this.user?.role === 'admin' || this.user?.role === 'editor';
   }
 
-  getUser() {
+  getUser(): AuthUser | null {
     return this.user;
   }
 
-  getToken() {
+  getToken(): string | null {
     return this.token;
   }
 
-  // Handle SSO Ticket from URL query
-  async handleUrlTicketExchange() {
+  async handleUrlTicketExchange(): Promise<boolean> {
     const urlParams = new URLSearchParams(window.location.search);
     const ssoTicket = urlParams.get('ticket');
     const directToken = urlParams.get('token');
@@ -70,12 +83,10 @@ class AuthService {
         console.error("SSO exchange error:", err);
       }
     } else if (directToken) {
-      // If direct token passed
       await this.verifyAndSetToken(directToken);
       this.cleanUrlParams();
     }
 
-    // Verify existing token if present
     if (this.token) {
       await this.verifyCurrentSession();
     }
@@ -83,7 +94,7 @@ class AuthService {
     return false;
   }
 
-  async verifyAndSetToken(token) {
+  async verifyAndSetToken(token: string): Promise<void> {
     try {
       const res = await fetch(`${CONFIG.API_BASE_URL}/api/auth/${CONFIG.PROJECT_KEY}/verify-session`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -95,7 +106,7 @@ class AuthService {
     } catch {}
   }
 
-  async verifyCurrentSession() {
+  async verifyCurrentSession(): Promise<void> {
     try {
       const res = await fetch(`${CONFIG.API_BASE_URL}/api/auth/${CONFIG.PROJECT_KEY}/verify-session`, {
         headers: { 'Authorization': `Bearer ${this.token}` }
@@ -104,12 +115,10 @@ class AuthService {
       if (!res.ok || !data.valid) {
         this.logout();
       }
-    } catch {
-      // Keep offline cache if server momentarily down
-    }
+    } catch {}
   }
 
-  setSession(token, user) {
+  setSession(token: string, user: AuthUser): void {
     this.token = token;
     this.user = user;
     localStorage.setItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN, token);
@@ -117,7 +126,7 @@ class AuthService {
     this.notifyListeners();
   }
 
-  logout() {
+  logout(): void {
     this.token = null;
     this.user = null;
     localStorage.removeItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
@@ -126,15 +135,13 @@ class AuthService {
     trackEvent('auth', 'logout');
   }
 
-  // Redirect to Central Login Portal
-  redirectToCentralLogin() {
+  redirectToCentralLogin(): void {
     const currentUrl = window.location.origin + window.location.pathname;
     const loginUrl = `${CONFIG.AUTH_HUB_URL}?project=${CONFIG.PROJECT_KEY}&returnUrl=${encodeURIComponent(currentUrl)}`;
     window.location.href = loginUrl;
   }
 
-  // Request OTP directly inside Family Tree modal
-  async requestDirectOtp(recipient) {
+  async requestDirectOtp(recipient: string) {
     const res = await fetch(`${CONFIG.API_BASE_URL}/api/auth/${CONFIG.PROJECT_KEY}/otp/request`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -145,8 +152,7 @@ class AuthService {
     return data;
   }
 
-  // Verify OTP directly inside Family Tree modal
-  async verifyDirectOtp(recipient, otp) {
+  async verifyDirectOtp(recipient: string, otp: string) {
     const res = await fetch(`${CONFIG.API_BASE_URL}/api/auth/${CONFIG.PROJECT_KEY}/otp/verify`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -159,12 +165,10 @@ class AuthService {
     return data;
   }
 
-  // Privacy Protection Filter
-  maskSensitiveData(individual) {
+  maskSensitiveData(individual: Individual): Individual {
     if (!individual) return individual;
-    const copy = { ...individual };
+    const copy: Individual = { ...individual };
 
-    // If unauthenticated, mask contact number and private notes for living persons
     if (!this.isAuthenticated()) {
       if (copy.contact) {
         const parts = copy.contact.split(' ');
@@ -178,7 +182,7 @@ class AuthService {
     return copy;
   }
 
-  cleanUrlParams() {
+  private cleanUrlParams(): void {
     const url = new URL(window.location.href);
     url.searchParams.delete('ticket');
     url.searchParams.delete('token');

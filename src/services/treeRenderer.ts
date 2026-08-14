@@ -1,43 +1,47 @@
-// Interactive Lineage & Family Tree Canvas Renderer
-import { dataService } from './dataService.js';
-import { trackEvent } from './telemetryService.js';
+import { Individual } from '../types/index.ts';
+import { dataService } from './dataService.ts';
+import { trackEvent } from './telemetryService.ts';
 
 export class TreeRenderer {
-  constructor(containerElement, onNodeSelect) {
+  private container: HTMLElement;
+  private viewport!: HTMLElement;
+  private canvas!: HTMLElement;
+  private onNodeSelect: (person: Individual) => void;
+
+  public zoom = 1;
+  public panX = 0;
+  public panY = 0;
+  private isDragging = false;
+  private startX = 0;
+  private startY = 0;
+  public selectedId: number | null = null;
+  public filterBranch = 'ALL';
+  public filterGeneration = 'ALL';
+  public viewMode: 'FULL' | 'FOCUS' = 'FULL';
+  public focusNodeId: number | null = null;
+
+  constructor(containerElement: HTMLElement, onNodeSelect: (person: Individual) => void) {
     this.container = containerElement;
     this.onNodeSelect = onNodeSelect;
-    this.zoom = 1;
-    this.panX = 0;
-    this.panY = 0;
-    this.isDragging = false;
-    this.startX = 0;
-    this.startY = 0;
-    this.selectedId = null;
-    this.filterBranch = 'ALL';
-    this.filterGeneration = 'ALL';
-    this.viewMode = 'FULL'; // 'FULL' or 'FOCUS'
-    this.focusNodeId = null;
-
     this.initCanvas();
   }
 
-  initCanvas() {
+  private initCanvas(): void {
     this.container.innerHTML = `
       <div class="tree-viewport" id="treeViewport">
         <div class="tree-canvas" id="treeCanvas"></div>
       </div>
     `;
 
-    this.viewport = this.container.querySelector('#treeViewport');
-    this.canvas = this.container.querySelector('#treeCanvas');
+    this.viewport = this.container.querySelector('#treeViewport') as HTMLElement;
+    this.canvas = this.container.querySelector('#treeCanvas') as HTMLElement;
 
     this.setupPanAndZoom();
   }
 
-  setupPanAndZoom() {
-    // Mouse Drag
+  private setupPanAndZoom(): void {
     this.viewport.addEventListener('mousedown', (e) => {
-      if (e.target.closest('.node-card')) return;
+      if ((e.target as HTMLElement).closest('.node-card')) return;
       this.isDragging = true;
       this.startX = e.clientX - this.panX;
       this.startY = e.clientY - this.panY;
@@ -56,7 +60,6 @@ export class TreeRenderer {
       this.viewport.style.cursor = 'grab';
     });
 
-    // Mouse Wheel Zoom
     this.viewport.addEventListener('wheel', (e) => {
       e.preventDefault();
       const zoomFactor = 1.1;
@@ -68,35 +71,35 @@ export class TreeRenderer {
     }, { passive: false });
   }
 
-  zoomIn(factor = 1.2) {
+  zoomIn(factor = 1.2): void {
     this.zoom = Math.min(this.zoom * factor, 2.5);
     this.updateTransform();
   }
 
-  zoomOut(factor = 1.2) {
+  zoomOut(factor = 1.2): void {
     this.zoom = Math.max(this.zoom / factor, 0.35);
     this.updateTransform();
   }
 
-  resetView() {
+  resetView(): void {
     this.zoom = 1;
     this.panX = 0;
     this.panY = 0;
     this.updateTransform();
   }
 
-  fitToScreen() {
+  fitToScreen(): void {
     this.zoom = 0.85;
     this.panX = 40;
     this.panY = 40;
     this.updateTransform();
   }
 
-  updateTransform() {
+  private updateTransform(): void {
     this.canvas.style.transform = `translate(${this.panX}px, ${this.panY}px) scale(${this.zoom})`;
   }
 
-  render(branchFilter = 'ALL', generationFilter = 'ALL') {
+  render(branchFilter = 'ALL', generationFilter = 'ALL'): void {
     this.filterBranch = branchFilter;
     this.filterGeneration = generationFilter;
     this.canvas.innerHTML = '';
@@ -108,12 +111,11 @@ export class TreeRenderer {
     }
   }
 
-  renderFullHierarchy() {
+  private renderFullHierarchy(): void {
     const genMap = dataService.getGenerationsMap();
     const treeWrapper = document.createElement('div');
     treeWrapper.className = 'hierarchy-container';
 
-    // Render generation rows (Gen 1 to Gen 6)
     for (let gen = 1; gen <= 6; gen++) {
       if (this.filterGeneration !== 'ALL' && Number(this.filterGeneration) !== gen) continue;
 
@@ -135,7 +137,7 @@ export class TreeRenderer {
         <div class="nodes-track" id="genTrack_${gen}"></div>
       `;
 
-      const track = row.querySelector(`#genTrack_${gen}`);
+      const track = row.querySelector(`#genTrack_${gen}`) as HTMLElement;
       filteredMembers.forEach(person => {
         const node = this.createNodeCard(person);
         track.appendChild(node);
@@ -147,7 +149,7 @@ export class TreeRenderer {
     this.canvas.appendChild(treeWrapper);
   }
 
-  renderFocusView(centerId) {
+  private renderFocusView(centerId: number): void {
     const person = dataService.getIndividual(centerId);
     if (!person) return;
 
@@ -176,27 +178,24 @@ export class TreeRenderer {
       </div>
     `;
 
-    // Ancestors
-    const ancestorRow = focusContainer.querySelector('#ancestorRow');
+    const ancestorRow = focusContainer.querySelector('#ancestorRow') as HTMLElement;
     if (ancestors.length === 0) {
-      ancestorRow.innerHTML = '<p class="text-muted">No earlier ancestors recorded</p>';
+      ancestorRow.innerHTML = '<p class="text-muted" style="color: #64748b; font-size: 13px;">No earlier ancestors recorded</p>';
     } else {
       ancestors.forEach(a => ancestorRow.appendChild(this.createNodeCard(a)));
     }
 
-    // Focal Person
-    const focalRow = focusContainer.querySelector('#focalRow');
+    const focalRow = focusContainer.querySelector('#focalRow') as HTMLElement;
     focalRow.appendChild(this.createNodeCard(person, true));
 
-    // Descendants
-    const descendantRow = focusContainer.querySelector('#descendantRow');
+    const descendantRow = focusContainer.querySelector('#descendantRow') as HTMLElement;
     if (descendants.length === 0) {
-      descendantRow.innerHTML = '<p class="text-muted">No recorded descendants</p>';
+      descendantRow.innerHTML = '<p class="text-muted" style="color: #64748b; font-size: 13px;">No recorded descendants</p>';
     } else {
       descendants.forEach(d => descendantRow.appendChild(this.createNodeCard(d)));
     }
 
-    focusContainer.querySelector('#btnExitFocus').addEventListener('click', () => {
+    focusContainer.querySelector('#btnExitFocus')?.addEventListener('click', () => {
       this.viewMode = 'FULL';
       this.focusNodeId = null;
       this.render();
@@ -206,14 +205,14 @@ export class TreeRenderer {
     this.canvas.appendChild(focusContainer);
   }
 
-  createNodeCard(person, isFocal = false) {
+  createNodeCard(person: Individual, isFocal = false): HTMLElement {
     const card = document.createElement('div');
     card.className = `node-card ${person.gender} ${isFocal ? 'focal-node' : ''} ${this.selectedId === person.id ? 'selected' : ''}`;
     card.id = `node_${person.id}`;
-    card.dataset.id = person.id;
+    card.dataset.id = String(person.id);
 
     const initials = person.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-    const branchColorClass = this.getBranchClass(person.branch);
+    const branchColorClass = this.getBranchClass(person.branch || '');
 
     card.innerHTML = `
       <div class="node-branch-stripe ${branchColorClass}"></div>
@@ -238,10 +237,9 @@ export class TreeRenderer {
     return card;
   }
 
-  selectNode(id) {
+  selectNode(id: number | string): void {
     this.selectedId = Number(id);
 
-    // Update active visual outline
     document.querySelectorAll('.node-card').forEach(n => n.classList.remove('selected'));
     const active = document.getElementById(`node_${id}`);
     if (active) active.classList.add('selected');
@@ -253,15 +251,15 @@ export class TreeRenderer {
     }
   }
 
-  setFocusView(id) {
+  setFocusView(id: number | string): void {
     this.viewMode = 'FOCUS';
     this.focusNodeId = Number(id);
     this.render();
     this.resetView();
   }
 
-  getGenerationTitle(gen) {
-    const titles = {
+  private getGenerationTitle(gen: number): string {
+    const titles: Record<number, string> = {
       1: "1st Generation – Forefathers & Roots",
       2: "2nd Generation – Lineage Elders",
       3: "3rd Generation – Patriarchs & Matriarchs",
@@ -272,7 +270,7 @@ export class TreeRenderer {
     return titles[gen] || `Generation ${gen}`;
   }
 
-  getBranchClass(branchName) {
+  private getBranchClass(branchName: string): string {
     if (!branchName) return 'branch-default';
     if (branchName.includes('Velusamy')) return 'branch-velusamy';
     if (branchName.includes('Anna Anban')) return 'branch-annan';

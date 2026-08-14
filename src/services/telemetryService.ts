@@ -1,5 +1,4 @@
-// Telemetry & Metrics Service - Non-blocking Event Tracking
-import { CONFIG } from './config.js';
+import { CONFIG } from '../config/index.ts';
 
 let sessionId = localStorage.getItem('familytree_session_id');
 if (!sessionId) {
@@ -7,8 +6,9 @@ if (!sessionId) {
   localStorage.setItem('familytree_session_id', sessionId);
 }
 
-export const trackEvent = (eventType, eventName, metadata = {}) => {
-  const user = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_USER) || 'null');
+export const trackEvent = (eventType: string, eventName: string, metadata: Record<string, any> = {}): void => {
+  const userJson = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_USER);
+  const user = userJson ? JSON.parse(userJson) : null;
   
   const payload = {
     events: [
@@ -26,7 +26,7 @@ export const trackEvent = (eventType, eventName, metadata = {}) => {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-Session-Id': sessionId
+      'X-Session-Id': sessionId || 'anonymous'
     },
     body: JSON.stringify(payload)
   }).catch(() => {});

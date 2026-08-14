@@ -1,5 +1,5 @@
-// Configuration for Rithamic Family Tree
-const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const isLocalhost = typeof window !== 'undefined' && 
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
 export const CONFIG = {
   PROJECT_KEY: 'rithamic_familytree',
@@ -10,4 +10,4 @@ export const CONFIG = {
     AUTH_USER: 'rithamic_familytree_user',
     TREE_STATE: 'rithamic_familytree_state'
   }
-};
+} as const;

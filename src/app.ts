@@ -1,89 +1,83 @@
-// Main Application Controller - Rithamic Family Tree
-import { dataService } from './dataService.js';
-import { auth } from './authService.js';
-import { TreeRenderer } from './treeRenderer.js';
-import { trackEvent } from './telemetryService.js';
+import { Individual, SearchMatch } from './types/index.ts';
+import { dataService } from './services/dataService.ts';
+import { auth } from './services/authService.ts';
+import { TreeRenderer } from './services/treeRenderer.ts';
+import { trackEvent } from './services/telemetryService.ts';
 
-let treeRenderer = null;
+let treeRenderer: TreeRenderer | null = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // 1. Load Dataset
   await dataService.load();
 
-  // 2. Setup Tree Renderer
-  const treeContainer = document.getElementById('treeContainer');
+  const treeContainer = document.getElementById('treeContainer') as HTMLElement;
   treeRenderer = new TreeRenderer(treeContainer, handleNodeSelection);
   treeRenderer.render();
   treeRenderer.fitToScreen();
 
-  // 3. Handle SSO Ticket or Session
   await auth.handleUrlTicketExchange();
   updateAuthUI();
 
-  // 4. Setup Event Listeners
   setupSearch();
   setupFiltersAndControls();
   setupAuthModal();
   setupDrawer();
 
-  // 5. Track initial page view telemetry
   trackEvent('page_view', 'familytree_loaded', {
     totalMembers: dataService.getAllIndividuals().length
   });
 });
 
-// Update UI based on Auth State
-function updateAuthUI() {
-  const guestView = document.getElementById('guestAuthView');
-  const userView = document.getElementById('userAuthView');
-  const userDisplayName = document.getElementById('userDisplayName');
-  const userRoleBadge = document.getElementById('userRoleBadge');
+function updateAuthUI(): void {
+  const guestView = document.getElementById('guestAuthView') as HTMLElement;
+  const userView = document.getElementById('userAuthView') as HTMLElement;
+  const userDisplayName = document.getElementById('userDisplayName') as HTMLElement;
+  const userRoleBadge = document.getElementById('userRoleBadge') as HTMLElement;
 
   if (auth.isAuthenticated()) {
     const user = auth.getUser();
     guestView.classList.add('hidden');
     userView.classList.remove('hidden');
-    userDisplayName.textContent = user.fullName || user.email.split('@')[0];
-    userRoleBadge.textContent = (user.role || 'viewer').toUpperCase();
+    if (user) {
+      userDisplayName.textContent = user.fullName || user.email.split('@')[0];
+      userRoleBadge.textContent = (user.role || 'viewer').toUpperCase();
+    }
   } else {
     guestView.classList.remove('hidden');
     userView.classList.add('hidden');
   }
 }
 
-// Search Functionality
-function setupSearch() {
-  const searchInput = document.getElementById('searchInput');
-  const searchDropdown = document.getElementById('searchDropdown');
+function setupSearch(): void {
+  const searchInput = document.getElementById('searchInput') as HTMLInputElement;
+  const searchDropdown = document.getElementById('searchDropdown') as HTMLElement;
 
-  let debounceTimeout = null;
+  let debounceTimeout: number | null = null;
 
   searchInput.addEventListener('input', (e) => {
-    clearTimeout(debounceTimeout);
-    const query = e.target.value.trim();
+    if (debounceTimeout) clearTimeout(debounceTimeout);
+    const query = (e.target as HTMLInputElement).value.trim();
 
     if (query.length === 0) {
       searchDropdown.classList.add('hidden');
       return;
     }
 
-    debounceTimeout = setTimeout(() => {
+    debounceTimeout = window.setTimeout(() => {
       const results = dataService.search(query);
       renderSearchResults(results);
       trackEvent('search_query', 'member_search', { query, matchCount: results.length });
     }, 200);
   });
 
-  // Hide dropdown on outside click
   document.addEventListener('click', (e) => {
-    if (!e.target.closest('.search-container')) {
+    if (!(e.target as HTMLElement).closest('.search-container')) {
       searchDropdown.classList.add('hidden');
     }
   });
 }
 
-function renderSearchResults(results) {
-  const searchDropdown = document.getElementById('searchDropdown');
+function renderSearchResults(results: SearchMatch[]): void {
+  const searchDropdown = document.getElementById('searchDropdown') as HTMLElement;
   searchDropdown.innerHTML = '';
 
   if (results.length === 0) {
@@ -108,8 +102,8 @@ function renderSearchResults(results) {
 
     item.addEventListener('click', () => {
       searchDropdown.classList.add('hidden');
-      document.getElementById('searchInput').value = ind.fullName;
-      treeRenderer.selectNode(ind.id);
+      (document.getElementById('searchInput') as HTMLInputElement).value = ind.fullName;
+      if (treeRenderer) treeRenderer.selectNode(ind.id);
     });
 
     searchDropdown.appendChild(item);
@@ -118,11 +112,10 @@ function renderSearchResults(results) {
   searchDropdown.classList.remove('hidden');
 }
 
-// Handle Node Selection & Profile Drawer
-function handleNodeSelection(rawPerson) {
+function handleNodeSelection(rawPerson: Individual): void {
   const person = auth.maskSensitiveData(rawPerson);
-  const drawer = document.getElementById('profileDrawer');
-  const drawerBody = document.getElementById('drawerBody');
+  const drawer = document.getElementById('profileDrawer') as HTMLElement;
+  const drawerBody = document.getElementById('drawerBody') as HTMLElement;
 
   const parents = dataService.getParents(person.id);
   const spouses = dataService.getSpouses(person.id);
@@ -217,21 +210,18 @@ function handleNodeSelection(rawPerson) {
     ` : ''}
   `;
 
-  // Focus Pedigree button
-  drawerBody.querySelector('#btnFocusPedigree').addEventListener('click', () => {
-    treeRenderer.setFocusView(person.id);
+  drawerBody.querySelector('#btnFocusPedigree')?.addEventListener('click', () => {
+    if (treeRenderer) treeRenderer.setFocusView(person.id);
     drawer.classList.remove('open');
   });
 
-  // Relation chips navigation
-  drawerBody.querySelectorAll('.rel-chip').forEach(chip => {
+  drawerBody.querySelectorAll<HTMLButtonElement>('.rel-chip').forEach(chip => {
     chip.addEventListener('click', () => {
       const targetId = chip.dataset.id;
-      treeRenderer.selectNode(targetId);
+      if (targetId && treeRenderer) treeRenderer.selectNode(targetId);
     });
   });
 
-  // Privacy unlock button inside drawer
   const btnUnlock = drawerBody.querySelector('#btnUnlockPrivacy');
   if (btnUnlock) {
     btnUnlock.addEventListener('click', () => {
@@ -242,68 +232,60 @@ function handleNodeSelection(rawPerson) {
   drawer.classList.add('open');
 }
 
-// Filters & Controls Setup
-function setupFiltersAndControls() {
-  const branchFilter = document.getElementById('branchFilter');
-  const generationFilter = document.getElementById('generationFilter');
+function setupFiltersAndControls(): void {
+  const branchFilter = document.getElementById('branchFilter') as HTMLSelectElement;
+  const generationFilter = document.getElementById('generationFilter') as HTMLSelectElement;
 
   branchFilter.addEventListener('change', () => {
-    treeRenderer.render(branchFilter.value, generationFilter.value);
+    if (treeRenderer) treeRenderer.render(branchFilter.value, generationFilter.value);
     trackEvent('filter_change', 'branch_filtered', { branch: branchFilter.value });
   });
 
   generationFilter.addEventListener('change', () => {
-    treeRenderer.render(branchFilter.value, generationFilter.value);
+    if (treeRenderer) treeRenderer.render(branchFilter.value, generationFilter.value);
     trackEvent('filter_change', 'generation_filtered', { generation: generationFilter.value });
   });
 
-  // Pan / Zoom Controls
-  document.getElementById('btnZoomIn').addEventListener('click', () => treeRenderer.zoomIn());
-  document.getElementById('btnZoomOut').addEventListener('click', () => treeRenderer.zoomOut());
-  document.getElementById('btnResetView').addEventListener('click', () => treeRenderer.resetView());
-  document.getElementById('btnFitScreen').addEventListener('click', () => treeRenderer.fitToScreen());
+  document.getElementById('btnZoomIn')?.addEventListener('click', () => treeRenderer?.zoomIn());
+  document.getElementById('btnZoomOut')?.addEventListener('click', () => treeRenderer?.zoomOut());
+  document.getElementById('btnResetView')?.addEventListener('click', () => treeRenderer?.resetView());
+  document.getElementById('btnFitScreen')?.addEventListener('click', () => treeRenderer?.fitToScreen());
 }
 
-// Slide-out Drawer close button
-function setupDrawer() {
-  document.getElementById('btnCloseDrawer').addEventListener('click', () => {
-    document.getElementById('profileDrawer').classList.remove('open');
+function setupDrawer(): void {
+  document.getElementById('btnCloseDrawer')?.addEventListener('click', () => {
+    (document.getElementById('profileDrawer') as HTMLElement).classList.remove('open');
   });
 }
 
-// Auth & Modal Setup
-function setupAuthModal() {
-  const loginModal = document.getElementById('loginModal');
-  const btnOpenLogin = document.getElementById('btnOpenLogin');
-  const btnCloseModal = document.getElementById('btnCloseModal');
-  const btnLogout = document.getElementById('btnLogout');
-  const btnSsoRedirect = document.getElementById('btnSsoRedirect');
-  const quickOtpForm = document.getElementById('quickOtpForm');
-  const quickOtpEmail = document.getElementById('quickOtpEmail');
-  const btnSendQuickOtp = document.getElementById('btnSendQuickOtp');
-  const quickOtpVerifyStep = document.getElementById('quickOtpVerifyStep');
-  const quickOtpCode = document.getElementById('quickOtpCode');
-  const btnVerifyQuickOtp = document.getElementById('btnVerifyQuickOtp');
+function setupAuthModal(): void {
+  const btnOpenLogin = document.getElementById('btnOpenLogin') as HTMLButtonElement;
+  const btnCloseModal = document.getElementById('btnCloseModal') as HTMLButtonElement;
+  const btnLogout = document.getElementById('btnLogout') as HTMLButtonElement;
+  const btnSsoRedirect = document.getElementById('btnSsoRedirect') as HTMLButtonElement;
+  const quickOtpForm = document.getElementById('quickOtpForm') as HTMLFormElement;
+  const quickOtpEmail = document.getElementById('quickOtpEmail') as HTMLInputElement;
+  const btnSendQuickOtp = document.getElementById('btnSendQuickOtp') as HTMLButtonElement;
+  const quickOtpVerifyStep = document.getElementById('quickOtpVerifyStep') as HTMLElement;
+  const quickOtpCode = document.getElementById('quickOtpCode') as HTMLInputElement;
+  const btnVerifyQuickOtp = document.getElementById('btnVerifyQuickOtp') as HTMLButtonElement;
 
   btnOpenLogin.addEventListener('click', openLoginModal);
   btnCloseModal.addEventListener('click', closeLoginModal);
 
-  // Logout
   btnLogout.addEventListener('click', () => {
     auth.logout();
     updateAuthUI();
-    if (treeRenderer.selectedId) {
+    if (treeRenderer && treeRenderer.selectedId) {
       const person = dataService.getIndividual(treeRenderer.selectedId);
       if (person) handleNodeSelection(person);
     }
   });
 
-  // SSO Redirect
   btnSsoRedirect.addEventListener('click', () => {
     auth.redirectToCentralLogin();
   });
 
-  // Quick OTP Flow inside modal
   let currentOtpEmail = '';
 
   quickOtpForm.addEventListener('submit', async (e) => {
@@ -320,7 +302,7 @@ function setupAuthModal() {
       quickOtpForm.classList.add('hidden');
       quickOtpVerifyStep.classList.remove('hidden');
       quickOtpCode.focus();
-    } catch (err) {
+    } catch (err: any) {
       alert(err.message || "Failed to send OTP code.");
     } finally {
       btnSendQuickOtp.textContent = 'Send 6-Digit Code';
@@ -342,11 +324,11 @@ function setupAuthModal() {
       await auth.verifyDirectOtp(currentOtpEmail, code);
       closeLoginModal();
       updateAuthUI();
-      if (treeRenderer.selectedId) {
+      if (treeRenderer && treeRenderer.selectedId) {
         const person = dataService.getIndividual(treeRenderer.selectedId);
         if (person) handleNodeSelection(person);
       }
-    } catch (err) {
+    } catch (err: any) {
       alert(err.message || "Invalid code.");
     } finally {
       btnVerifyQuickOtp.textContent = 'Verify & Sign In';
@@ -357,10 +339,10 @@ function setupAuthModal() {
   auth.onAuthChange(() => updateAuthUI());
 }
 
-function openLoginModal() {
-  document.getElementById('loginModal').classList.remove('hidden');
+function openLoginModal(): void {
+  document.getElementById('loginModal')?.classList.remove('hidden');
 }
 
-function closeLoginModal() {
-  document.getElementById('loginModal').classList.add('hidden');
+function closeLoginModal(): void {
+  document.getElementById('loginModal')?.classList.add('hidden');
 }

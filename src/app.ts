@@ -297,7 +297,7 @@ function setupAuthModal(): void {
     btnSendQuickOtp.disabled = true;
 
     try {
-      await auth.requestDirectOtp(email);
+      const otpRes = await auth.requestDirectOtp(email); if (otpRes && otpRes.devOtp) { (document.getElementById("quickOtpCode") as HTMLInputElement).value = otpRes.devOtp; alert(`Dev OTP code: ${otpRes.devOtp}`); }
       currentOtpEmail = email;
       quickOtpForm.classList.add('hidden');
       quickOtpVerifyStep.classList.remove('hidden');

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rithamic Family Tree – Thangamani / Periya Pannai Lineage</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌳</text></svg>">
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="brand-section">
+      <div class="brand-logo">🌳</div>
+      <div class="brand-info">
+        <h1>Rithamic Family Tree</h1>
+        <p>Thangamani &bull; Periya Pannai Lineage (60 Members)</p>
+      </div>
+    </div>
+
+    <!-- Smart Quick Search -->
+    <div class="search-container">
+      <div class="search-input-wrapper">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="searchInput" class="search-input" placeholder="Search relative (e.g. Gowtham, Velusamy)..." autocomplete="off">
+      </div>
+      <div id="searchDropdown" class="search-dropdown hidden"></div>
+    </div>
+
+    <!-- Auth Actions -->
+    <div class="header-actions">
+      <div id="guestAuthView">
+        <button class="btn-auth" id="btnOpenLogin">
+          <span>🔒 Member Login</span>
+        </button>
+      </div>
+
+      <div id="userAuthView" class="hidden">
+        <div class="user-badge">
+          <span id="userDisplayName" style="font-size: 13px; font-weight: 600;">User</span>
+          <span class="role-pill" id="userRoleBadge">VIEWER</span>
+          <button id="btnLogout" style="background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 12px; margin-left: 6px;">✕</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Toolbar & Filters -->
+  <div class="toolbar-bar">
+    <div class="filter-group">
+      <label for="branchFilter" style="color: #94a3b8;">Branch:</label>
+      <select id="branchFilter" class="filter-select">
+        <option value="ALL">All Branches (Entire Family)</option>
+        <option value="Velusamy">Velusamy Kounder & Chellamal Lineage</option>
+        <option value="Anna Anban">Anna Anban Appa Lineage</option>
+        <option value="Kandasamy">Kandasamy Gounder Lineage</option>
+        <option value="Palani Vel">Palani Vel Appa Lineage</option>
+      </select>
+
+      <label for="generationFilter" style="color: #94a3b8; margin-left: 12px;">Generation:</label>
+      <select id="generationFilter" class="filter-select">
+        <option value="ALL">All 6 Generations</option>
+        <option value="1">Gen 1 – Forefathers</option>
+        <option value="2">Gen 2 – Elders</option>
+        <option value="3">Gen 3 – Patriarchs</option>
+        <option value="4">Gen 4 – Senior Members</option>
+        <option value="5">Gen 5 – Contemporary</option>
+        <option value="6">Gen 6 – Children</option>
+      </select>
+    </div>
+
+    <div class="canvas-controls">
+      <button class="ctrl-btn" id="btnZoomIn" title="Zoom In">+</button>
+      <button class="ctrl-btn" id="btnZoomOut" title="Zoom Out">−</button>
+      <button class="ctrl-btn" id="btnResetView" title="Reset View">⊙</button>
+      <button class="ctrl-btn" id="btnFitScreen" title="Fit to Screen" style="width: auto; padding: 0 10px; font-size: 11px;">Fit</button>
+    </div>
+  </div>
+
+  <!-- Main Tree Viewport Container -->
+  <main id="treeContainer" style="flex: 1; display: flex;"></main>
+
+  <!-- Slide-out Profile Drawer -->
+  <aside class="profile-drawer" id="profileDrawer">
+    <div class="drawer-header">
+      <span style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase;">Family Profile</span>
+      <button class="btn-close-drawer" id="btnCloseDrawer">×</button>
+    </div>
+
+    <div class="drawer-body" id="drawerBody">
+      <!-- Injected dynamically by app.js -->
+    </div>
+  </aside>
+
+  <!-- Direct In-App Login Modal -->
+  <div class="modal-overlay hidden" id="loginModal">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="font-size: 18px; font-weight: 700; color: #ffffff;">Family Portal Sign-In</h3>
+        <button id="btnCloseModal" style="background: transparent; border: none; color: #94a3b8; font-size: 20px; cursor: pointer;">✕</button>
+      </div>
+      <p style="font-size: 13px; color: #94a3b8; margin-bottom: 20px;">
+        Sign in with your verified email to unlock private contact numbers, residential records, and admin privileges.
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <button class="btn-auth" id="btnSsoRedirect" style="width: 100%; justify-content: center; padding: 12px; font-size: 14px;">
+          🚀 Sign in with Rithamic Central Login
+        </button>
+
+        <div style="text-align: center; color: #64748b; font-size: 12px; margin: 4px 0;">— OR QUICK OTP —</div>
+
+        <form id="quickOtpForm">
+          <input type="email" id="quickOtpEmail" class="search-input" placeholder="Enter your email..." required style="margin-bottom: 10px;">
+          <button type="submit" class="btn-auth" id="btnSendQuickOtp" style="width: 100%; justify-content: center; padding: 10px;">
+            Send 6-Digit Code
+          </button>
+        </form>
+
+        <div id="quickOtpVerifyStep" class="hidden">
+          <input type="text" id="quickOtpCode" class="search-input" placeholder="Enter 6-digit code..." maxlength="6" style="margin-bottom: 10px; text-align: center; font-size: 20px; font-weight: bold; letter-spacing: 4px;">
+          <button type="button" class="btn-auth" id="btnVerifyQuickOtp" style="width: 100%; justify-content: center; padding: 10px;">
+            Verify & Sign In
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

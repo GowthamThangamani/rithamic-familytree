@@ -1,0 +1,13 @@
+{
+  "name": "rithamic-familytree",
+  "version": "2.0.0",
+  "description": "Interactive Multi-Generational Lineage Portal for the Thangamani / Periya Pannai Family",
+  "main": "src/index.html",
+  "scripts": {
+    "dev": "npx serve src -l 5173",
+    "start": "npx serve src -l 5173"
+  },
+  "keywords": ["familytree", "lineage", "genealogy", "rithamic"],
+  "author": "Gowtham Thangamani",
+  "license": "ISC"
+}

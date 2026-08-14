@@ -173,6 +173,7 @@ function handleNodeSelection(rawPerson: Individual): void {
   const spouses = dataService.getSpouses(person.id);
   const siblings = dataService.getSiblings(person.id);
   const children = dataService.getChildren(person.id);
+  const inLaws = kinshipService.getInLawsList(person.id);
 
   const activeFocalId = (treeRenderer && treeRenderer.focusedPersonId) || 1;
   const kinship = kinshipService.calculateRelationship(activeFocalId, person.id);
@@ -229,6 +230,20 @@ function handleNodeSelection(rawPerson: Individual): void {
         ${children.length > 0 ? children.map(c => `<button class="rel-chip" data-id="${c.id}">${c.fullName}</button>`).join('') : '<span style="font-size: 13px; color: #64748b;">No descendants recorded</span>'}
       </div>
     </div>
+
+    ${inLaws.length > 0 ? `
+      <div class="drawer-section">
+        <div class="drawer-section-title">In-Laws & Extended Family (சம்பந்தி / மாமியார் வழி)</div>
+        <div class="relation-chips" id="inlawsChips">
+          ${inLaws.map(il => `
+            <button class="rel-chip inlaw-chip" data-id="${il.person.id}" title="${il.connection}">
+              ${il.person.fullName}
+              <span style="font-size: 10px; opacity: 0.8; margin-left: 4px;">(${il.kinship.tamil})</span>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    ` : ''}
 
     <!-- Personal & Contact Info -->
     <div class="drawer-section">

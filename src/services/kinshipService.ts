@@ -1,3 +1,4 @@
+import { Individual } from '../types/index.ts';
 import { dataService } from './dataService.ts';
 
 export interface KinshipResult {
@@ -289,6 +290,49 @@ export class KinshipService {
     } else {
       return { english: `Descendant (Gen ${target.generation})`, tamil: `வாரிசு / வழித்தோன்றல் (${target.generation}-ஆம் தலைமுறை)`, tagText: `Descendant • வழித்தோன்றல்`, relationType: 'descendant' };
     }
+  }
+
+  /**
+   * Retrieves all known in-laws (parents-in-law, siblings-in-law, co-in-laws) connected via marriage
+   */
+  public getInLawsList(personId: number): Array<{ person: Individual; kinship: KinshipResult; connection: string }> {
+    const results: Array<{ person: Individual; kinship: KinshipResult; connection: string }> = [];
+    const seen = new Set<number>([personId]);
+
+    const spouses = dataService.getSpouses(personId);
+    spouses.forEach(spouse => {
+      // Spouse's Parents
+      const sParents = dataService.getParents(spouse.id);
+      sParents.forEach(sp => {
+        if (!seen.has(sp.id)) {
+          seen.add(sp.id);
+          const k = this.calculateRelationship(personId, sp.id);
+          if (k) results.push({ person: sp, kinship: k, connection: `${spouse.fullName}'s ${sp.gender === 'male' ? 'Father' : 'Mother'}` });
+        }
+      });
+
+      // Spouse's Siblings
+      const sSiblings = dataService.getSiblings(spouse.id);
+      sSiblings.forEach(ss => {
+        if (!seen.has(ss.id)) {
+          seen.add(ss.id);
+          const k = this.calculateRelationship(personId, ss.id);
+          if (k) results.push({ person: ss, kinship: k, connection: `${spouse.fullName}'s ${ss.gender === 'male' ? 'Brother' : 'Sister'}` });
+        }
+
+        // Spouse's Sibling's Spouse (e.g. Selladurai)
+        const ssSpouses = dataService.getSpouses(ss.id);
+        ssSpouses.forEach(sss => {
+          if (!seen.has(sss.id)) {
+            seen.add(sss.id);
+            const k = this.calculateRelationship(personId, sss.id);
+            if (k) results.push({ person: sss, kinship: k, connection: `${ss.fullName}'s Spouse` });
+          }
+        });
+      });
+    });
+
+    return results;
   }
 }
 

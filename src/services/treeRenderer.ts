@@ -36,6 +36,7 @@ export class TreeRenderer {
   public filterGeneration = 'ALL';
   public viewMode: 'TREE' | 'PEDIGREE' | 'MATRIX' = 'TREE';
   public focalMemberId: number | null = null;
+  public focalTreeRootId: number | null = null;
   private collapsedNodes = new Set<number>();
 
   private readonly CARD_WIDTH = 230;
@@ -100,79 +101,111 @@ export class TreeRenderer {
     }, { passive: false });
   }
 
-  zoomIn(factor = 1.15): void {
-    this.zoom = Math.min(this.zoom * factor, 2.5);
+  public zoomIn(factor = 1.15): void {
+    this.zoom = Math.min(this.zoom * factor, 2.2);
     this.updateTransform();
   }
 
-  zoomOut(factor = 1.15): void {
+  public zoomOut(factor = 1.15): void {
     this.zoom = Math.max(this.zoom / factor, 0.25);
     this.updateTransform();
   }
 
-  resetView(): void {
+  public resetView(): void {
     this.zoom = 0.85;
     this.panX = 60;
     this.panY = 60;
     this.updateTransform();
   }
 
-  fitToScreen(): void {
-    this.zoom = 0.75;
-    this.panX = 80;
-    this.panY = 40;
-    this.updateTransform();
+  public fitToScreen(): void {
+    const vWidth = this.viewport.clientWidth;
+    const contentWidth = this.htmlLayer.scrollWidth || 2000;
+    if (contentWidth > 0 && vWidth > 0) {
+      this.zoom = Math.min(Math.max((vWidth - 80) / contentWidth, 0.35), 1.0);
+      this.panX = 40;
+      this.panY = 40;
+      this.updateTransform();
+    }
   }
 
-  centerOnNode(id: number): void {
-    const card = document.getElementById(`node_${id}`);
-    if (!card) return;
+  public centerOnNode(nodeId: number): void {
+    // Un-collapse all ancestors so node is visible
+    this.uncollapseAncestors(nodeId);
+    this.render();
 
-    const rect = card.getBoundingClientRect();
-    const viewportRect = this.viewport.getBoundingClientRect();
+    setTimeout(() => {
+      const el = document.getElementById(`node_${nodeId}`);
+      if (el && this.viewport) {
+        const vRect = this.viewport.getBoundingClientRect();
+        const cRect = el.getBoundingClientRect();
+        const elCenterX = (cRect.left - this.canvas.getBoundingClientRect().left) / this.zoom + el.offsetWidth / 2;
+        const elCenterY = (cRect.top - this.canvas.getBoundingClientRect().top) / this.zoom + el.offsetHeight / 2;
 
-    // Compute center relative to current scale
-    const targetX = (viewportRect.width / 2) - ((rect.left - this.panX) * this.zoom) - (rect.width * this.zoom / 2);
-    const targetY = (viewportRect.height / 2) - ((rect.top - this.panY) * this.zoom) - (rect.height * this.zoom / 2);
+        this.panX = vWidthHalf(vRect.width) - elCenterX * this.zoom;
+        this.panY = vRect.height / 3 - elCenterY * this.zoom;
+        this.updateTransform();
 
-    this.panX = targetX;
-    this.panY = targetY;
-    this.zoom = 0.95;
-    this.updateTransform();
+        // Pulsing glow animation
+        el.classList.add('focal-node');
+        setTimeout(() => el.classList.remove('focal-node'), 3000);
+      }
+    }, 50);
+
+    function vWidthHalf(w: number) {
+      return w / 2;
+    }
+  }
+
+  private uncollapseAncestors(nodeId: number): void {
+    const ancestors = dataService.getAncestors(nodeId);
+    ancestors.forEach(a => this.collapsedNodes.delete(a.id));
   }
 
   private updateTransform(): void {
     this.canvas.style.transform = `translate(${this.panX}px, ${this.panY}px) scale(${this.zoom})`;
   }
 
-  render(branchFilter = 'ALL', generationFilter = 'ALL'): void {
+  // ==========================================================================
+  // PUBLIC RENDER DISPATCHER
+  // ==========================================================================
+
+  public render(branchFilter = 'ALL', genFilter = 'ALL'): void {
     this.filterBranch = branchFilter;
-    this.filterGeneration = generationFilter;
+    this.filterGeneration = genFilter;
 
-    this.htmlLayer.innerHTML = '';
     this.svgLayer.innerHTML = '';
+    this.htmlLayer.innerHTML = '';
 
-    if (this.viewMode === 'PEDIGREE' && this.focalMemberId) {
-      this.renderPedigreeView(this.focalMemberId);
-    } else if (this.viewMode === 'MATRIX') {
-      this.renderGenerationalMatrix();
-    } else {
+    if (this.viewMode === 'TREE') {
       this.renderHierarchicalTree();
+    } else if (this.viewMode === 'PEDIGREE') {
+      this.renderPedigreeView();
+    } else if (this.viewMode === 'MATRIX') {
+      this.renderMatrixView();
     }
+
+    this.updateTransform();
   }
 
-  expandAll(): void {
+  public expandAll(): void {
     this.collapsedNodes.clear();
     this.render(this.filterBranch, this.filterGeneration);
+    trackEvent('interaction', 'expand_all');
   }
 
-  collapseAll(): void {
-    const roots = this.findRootIndividuals();
-    roots.forEach(r => this.collapsedNodes.add(r.id));
+  public collapseAll(): void {
+    dataService.getAllIndividuals().forEach(ind => {
+      const children = dataService.getChildren(ind.id);
+      if (children.length > 0) {
+        this.collapsedNodes.add(ind.id);
+      }
+    });
     this.render(this.filterBranch, this.filterGeneration);
+    trackEvent('interaction', 'collapse_all');
   }
 
-  toggleNodeCollapse(id: number): void {
+  public toggleNodeCollapse(id: number): void {
     if (this.collapsedNodes.has(id)) {
       this.collapsedNodes.delete(id);
     } else {
@@ -186,10 +219,41 @@ export class TreeRenderer {
   // VIEW MODE 1: HIERARCHICAL TREE GRAPH (WITH SVG BRANCHES & MARITAL HUBS)
   // ==========================================================================
 
+  public getTopAncestor(personId: number): Individual {
+    let current = dataService.getIndividual(personId);
+    if (!current) return current as any;
+    const visited = new Set<number>([personId]);
+    while (current) {
+      const parents = dataService.getParents(current.id);
+      if (!parents || parents.length === 0) break;
+      const maleParent = parents.find(p => p.gender === 'male');
+      const nextParent = maleParent || parents[0];
+      if (!nextParent || visited.has(nextParent.id)) break;
+      visited.add(nextParent.id);
+      current = nextParent;
+    }
+    return current;
+  }
+
+  public showFamilyTree(personId: number): void {
+    this.viewMode = 'TREE';
+    this.focalTreeRootId = personId;
+    this.render();
+    this.centerOnNode(personId);
+    trackEvent('interaction', 'view_family_tree', { id: personId });
+  }
+
+  public resetTreeFocus(): void {
+    this.focalTreeRootId = null;
+    this.render();
+    this.fitToScreen();
+    trackEvent('interaction', 'reset_tree_focus');
+  }
+
   private renderHierarchicalTree(): void {
     const rootIndividuals = this.findRootIndividuals();
     if (rootIndividuals.length === 0) {
-      this.htmlLayer.innerHTML = `<div class="empty-state">No roots found in dataset.</div>`;
+      this.htmlLayer.innerHTML = `<div style="padding: 40px; color: #94a3b8;">No root ancestors found in dataset.</div>`;
       return;
     }
 
@@ -204,7 +268,7 @@ export class TreeRenderer {
 
     // 1. Calculate Layout Coordinates
     let currentX = 60;
-    const startY = 60;
+    const startY = this.focalTreeRootId ? 110 : 60;
 
     treeRoots.forEach(root => {
       this.calculateSubtreeWidths(root);
@@ -248,9 +312,37 @@ export class TreeRenderer {
     treeRoots.forEach(root => {
       this.renderSubtreeCards(root);
     });
+
+    // 4. Render Focus Banner if viewing single tree
+    if (this.focalTreeRootId !== null) {
+      const focalPerson = dataService.getIndividual(this.focalTreeRootId);
+      if (focalPerson) {
+        const banner = document.createElement('div');
+        banner.className = 'tree-focus-banner';
+        const parents = dataService.getParents(focalPerson.id);
+        const parentText = parents.length > 0 ? `Parents: ${parents.map(p => p.fullName).join(' & ')}` : 'Ancestral Root';
+        banner.innerHTML = `
+          <div class="tree-focus-info">
+            <span class="focus-title">🌳 Viewing Tree: <strong>${focalPerson.fullName}</strong> ${focalPerson.tamilName ? `(${focalPerson.tamilName})` : ''}</span>
+            <span class="focus-parents">${parentText} &bull; Generation ${focalPerson.generation}</span>
+          </div>
+          <button class="btn-reset-focus" id="btnResetTreeFocus">↺ View All Lineages</button>
+        `;
+        banner.querySelector('#btnResetTreeFocus')?.addEventListener('click', () => {
+          this.resetTreeFocus();
+        });
+        this.htmlLayer.appendChild(banner);
+      }
+    }
   }
 
   private findRootIndividuals(): Individual[] {
+    // If a focal tree root is active, show only that root!
+    if (this.focalTreeRootId !== null) {
+      const topRoot = this.getTopAncestor(this.focalTreeRootId);
+      if (topRoot) return [topRoot];
+    }
+
     const all = dataService.getAllIndividuals();
     // Return all root ancestors who have no parents recorded in the database and have children or are Gen 1
     const roots = all.filter(p => {
@@ -260,11 +352,9 @@ export class TreeRenderer {
     });
 
     if (roots.length > 0) {
-      // Sort so Gen 1 roots (e.g. Periya Pannai) appear first, followed by other family trees
       return roots.sort((a, b) => (a.generation || 1) - (b.generation || 1));
     }
 
-    // Fallback: search for top-most generation males
     const minGen = Math.min(...all.map(p => p.generation || 1));
     return all.filter(p => p.generation === minGen && p.gender === 'male');
   }
@@ -275,7 +365,6 @@ export class TreeRenderer {
 
     const spouses = dataService.getSpouses(person.id);
     const spouse = spouses.length > 0 ? spouses[0] : null;
-    if (spouse) processed.add(spouse.id);
 
     // Get children of either parent
     const childrenSet = new Set<number>();
@@ -320,12 +409,12 @@ export class TreeRenderer {
       return unit.subtreeWidth;
     }
 
-    let childrenWidthSum = 0;
+    let totalChildrenWidth = 0;
     unit.children.forEach(child => {
-      childrenWidthSum += this.calculateSubtreeWidths(child);
+      totalChildrenWidth += this.calculateSubtreeWidths(child);
     });
 
-    unit.subtreeWidth = Math.max(unit.width + this.H_GAP, childrenWidthSum);
+    unit.subtreeWidth = Math.max(unit.width + this.H_GAP, totalChildrenWidth);
     return unit.subtreeWidth;
   }
 
@@ -337,164 +426,154 @@ export class TreeRenderer {
       return;
     }
 
-    let childLeftX = leftX;
+    let childLeft = leftX;
     unit.children.forEach(child => {
-      this.assignCoordinates(child, childLeftX, currentY + this.CARD_HEIGHT + this.V_GAP);
-      childLeftX += child.subtreeWidth;
+      this.assignCoordinates(child, childLeft, currentY + this.CARD_HEIGHT + this.V_GAP);
+      childLeft += child.subtreeWidth;
     });
 
-    // Center parent over all children
     const firstChild = unit.children[0];
     const lastChild = unit.children[unit.children.length - 1];
-    const firstCenter = firstChild.x + (firstChild.width / 2);
-    const lastCenter = lastChild.x + (lastChild.width / 2);
+    const childrenMidX = (firstChild.x + firstChild.width / 2 + lastChild.x + lastChild.width / 2) / 2;
 
-    unit.x = ((firstCenter + lastCenter) / 2) - (unit.width / 2);
-
-    // Prevent parent shifting left of allocated bounding box
-    if (unit.x < leftX) {
-      unit.x = leftX;
-    }
+    unit.x = childrenMidX - unit.width / 2;
   }
 
   private renderSubtreeConnectors(unit: TreeNodeUnit): void {
+    const parentBottomX = unit.x + unit.width / 2;
     const parentBottomY = unit.y + this.CARD_HEIGHT;
-    const parentCenterX = unit.x + (unit.width / 2);
 
-    // 1. Marriage connector if couple
+    // 1. Spousal Connector if couple
     if (unit.spouse) {
-      const c1CenterX = unit.x + (this.CARD_WIDTH / 2);
-      const c2CenterX = unit.x + this.CARD_WIDTH + 40 + (this.CARD_WIDTH / 2);
-      const coupleCenterY = unit.y + (this.CARD_HEIGHT / 2);
+      const c1CenterX = unit.x + this.CARD_WIDTH / 2;
+      const c2CenterX = unit.x + this.CARD_WIDTH + 40 + this.CARD_WIDTH / 2;
+      const lineY = unit.y + this.CARD_HEIGHT / 2;
 
-      const marriageLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      marriageLine.setAttribute('d', `M ${c1CenterX} ${coupleCenterY} L ${c2CenterX} ${coupleCenterY}`);
-      marriageLine.setAttribute('class', 'svg-marriage-line');
-      this.svgLayer.appendChild(marriageLine);
+      const spLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      spLine.setAttribute('x1', String(c1CenterX));
+      spLine.setAttribute('y1', String(lineY));
+      spLine.setAttribute('x2', String(c2CenterX));
+      spLine.setAttribute('y2', String(lineY));
+      spLine.setAttribute('class', 'svg-marriage-line');
+      this.svgLayer.appendChild(spLine);
     }
 
-    // 2. Parent-to-Children connections
+    // 2. Parent-to-Children Drop Lines & Bus Rails
     if (unit.children.length > 0 && !unit.isCollapsed) {
       const busY = parentBottomY + 45;
 
-      // Drop line from parent center to horizontal bus
-      const parentDrop = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      parentDrop.setAttribute('d', `M ${parentCenterX} ${parentBottomY} L ${parentCenterX} ${busY}`);
-      parentDrop.setAttribute('class', `svg-branch-line line-from-${unit.id}`);
-      this.svgLayer.appendChild(parentDrop);
+      // Vertical trunk drop from parent center down to bus rail
+      const trunkLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      trunkLine.setAttribute('x1', String(parentBottomX));
+      trunkLine.setAttribute('y1', String(parentBottomY));
+      trunkLine.setAttribute('x2', String(parentBottomX));
+      trunkLine.setAttribute('y2', String(busY));
+      trunkLine.setAttribute('class', 'svg-branch-line');
+      this.svgLayer.appendChild(trunkLine);
 
-      if (unit.children.length === 1) {
-        // Single child: straight drop line
-        const child = unit.children[0];
-        const childCenterX = child.x + (child.width / 2);
+      // Horizontal bus rail spanning across all children
+      const firstChild = unit.children[0];
+      const lastChild = unit.children[unit.children.length - 1];
+      const busStartX = firstChild.x + firstChild.width / 2;
+      const busEndX = lastChild.x + lastChild.width / 2;
+
+      const busLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      busLine.setAttribute('x1', String(busStartX));
+      busLine.setAttribute('y1', String(busY));
+      busLine.setAttribute('x2', String(busEndX));
+      busLine.setAttribute('y2', String(busY));
+      busLine.setAttribute('class', 'svg-branch-bus');
+      this.svgLayer.appendChild(busLine);
+
+      // Vertical fork drops from bus down into top center of each child unit
+      unit.children.forEach(child => {
+        const childTopX = child.x + child.width / 2;
         const childTopY = child.y;
 
-        const singleChildLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        singleChildLine.setAttribute('d', `M ${parentCenterX} ${busY} L ${childCenterX} ${busY} L ${childCenterX} ${childTopY}`);
-        singleChildLine.setAttribute('class', `svg-branch-line line-to-${child.id}`);
-        this.svgLayer.appendChild(singleChildLine);
-      } else {
-        // Multiple children: Horizontal bus rail spanning first to last child
-        const firstChildCenterX = unit.children[0].x + (unit.children[0].width / 2);
-        const lastChildCenterX = unit.children[unit.children.length - 1].x + (unit.children[unit.children.length - 1].width / 2);
+        const forkLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        forkLine.setAttribute('x1', String(childTopX));
+        forkLine.setAttribute('y1', String(busY));
+        forkLine.setAttribute('x2', String(childTopX));
+        forkLine.setAttribute('y2', String(childTopY));
+        forkLine.setAttribute('class', 'svg-branch-fork');
+        this.svgLayer.appendChild(forkLine);
 
-        const busLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        busLine.setAttribute('d', `M ${firstChildCenterX} ${busY} L ${lastChildCenterX} ${busY}`);
-        busLine.setAttribute('class', `svg-branch-bus line-bus-${unit.id}`);
-        this.svgLayer.appendChild(busLine);
-
-        // Fork down into each child
-        unit.children.forEach(child => {
-          const childCenterX = child.x + (child.width / 2);
-          const childTopY = child.y;
-
-          const forkLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-          forkLine.setAttribute('d', `M ${childCenterX} ${busY} L ${childCenterX} ${childTopY}`);
-          forkLine.setAttribute('class', `svg-branch-fork line-to-${child.id}`);
-          this.svgLayer.appendChild(forkLine);
-        });
-      }
-
-      // Recursively render children connectors
-      unit.children.forEach(child => {
+        // Recursively render child connectors
         this.renderSubtreeConnectors(child);
       });
     }
   }
 
   private renderSubtreeCards(unit: TreeNodeUnit): void {
-    const cardGroup = document.createElement('div');
-    cardGroup.className = 'tree-node-group';
-    cardGroup.style.position = 'absolute';
-    cardGroup.style.left = `${unit.x}px`;
-    cardGroup.style.top = `${unit.y}px`;
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = `${unit.x}px`;
+    container.style.top = `${unit.y}px`;
+    container.style.width = `${unit.width}px`;
 
     if (unit.spouse) {
-      // Render married couple side by side
-      const coupleWrapper = document.createElement('div');
-      coupleWrapper.className = 'couple-unit-container';
+      // Couple Unit Box
+      const coupleBox = document.createElement('div');
+      coupleBox.className = 'couple-unit-container';
+      
+      const card1 = this.createNodeCard(unit.person);
+      const ring = document.createElement('div');
+      ring.className = 'marriage-ring-badge';
+      ring.innerHTML = '💍';
+      ring.title = 'Married Couple';
+      const card2 = this.createNodeCard(unit.spouse);
 
-      const p1Card = this.createNodeCard(unit.person);
-      const ringBadge = document.createElement('div');
-      ringBadge.className = 'marriage-ring-badge';
-      ringBadge.innerHTML = '💍';
-      ringBadge.title = `Married: ${unit.person.fullName} & ${unit.spouse.fullName}`;
+      coupleBox.appendChild(card1);
+      coupleBox.appendChild(ring);
+      coupleBox.appendChild(card2);
 
-      const p2Card = this.createNodeCard(unit.spouse);
-
-      coupleWrapper.appendChild(p1Card);
-      coupleWrapper.appendChild(ringBadge);
-      coupleWrapper.appendChild(p2Card);
-
-      // Subtree toggle button on couple
+      // Subtree Toggle Pill on bottom center
       if (unit.children.length > 0) {
         const toggleBtn = document.createElement('button');
-        toggleBtn.className = `btn-subtree-toggle ${unit.isCollapsed ? 'collapsed' : 'expanded'}`;
-        toggleBtn.innerHTML = unit.isCollapsed ? `+ ${unit.children.length} Children` : `−`;
-        toggleBtn.title = unit.isCollapsed ? `Expand ${unit.children.length} descendants` : `Collapse branch`;
+        toggleBtn.className = 'btn-subtree-toggle';
+        toggleBtn.innerHTML = unit.isCollapsed ? `+ ${unit.children.length} Children` : '−';
+        toggleBtn.title = unit.isCollapsed ? 'Expand descendants' : 'Collapse descendants';
         toggleBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           this.toggleNodeCollapse(unit.person.id);
         });
-        coupleWrapper.appendChild(toggleBtn);
+        coupleBox.appendChild(toggleBtn);
       }
 
-      cardGroup.appendChild(coupleWrapper);
+      container.appendChild(coupleBox);
     } else {
-      // Single person node
-      const singleCard = this.createNodeCard(unit.person);
+      // Single Individual Box
+      const card = this.createNodeCard(unit.person);
+      container.appendChild(card);
 
       if (unit.children.length > 0) {
         const toggleBtn = document.createElement('button');
-        toggleBtn.className = `btn-subtree-toggle ${unit.isCollapsed ? 'collapsed' : 'expanded'}`;
-        toggleBtn.innerHTML = unit.isCollapsed ? `+ ${unit.children.length}` : `−`;
+        toggleBtn.className = 'btn-subtree-toggle';
+        toggleBtn.innerHTML = unit.isCollapsed ? `+ ${unit.children.length} Children` : '−';
+        toggleBtn.title = unit.isCollapsed ? 'Expand descendants' : 'Collapse descendants';
         toggleBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           this.toggleNodeCollapse(unit.person.id);
         });
-        singleCard.appendChild(toggleBtn);
+        container.appendChild(toggleBtn);
       }
-
-      cardGroup.appendChild(singleCard);
     }
 
-    this.htmlLayer.appendChild(cardGroup);
+    this.htmlLayer.appendChild(container);
 
-    // Recursively render children if not collapsed
     if (!unit.isCollapsed) {
-      unit.children.forEach(child => {
-        this.renderSubtreeCards(child);
-      });
+      unit.children.forEach(child => this.renderSubtreeCards(child));
     }
   }
 
   // ==========================================================================
-  // VIEW MODE 2: PEDIGREE & DIRECT ANCESTRY FOCUS
+  // VIEW MODE 2: PEDIGREE FOCUS VIEW
   // ==========================================================================
 
-  private renderPedigreeView(focalId: number): void {
-    const focal = dataService.getIndividual(focalId);
-    if (!focal) return;
+  private renderPedigreeView(): void {
+    const focalId = this.focalMemberId || 1;
+    const focalPerson = dataService.getIndividual(focalId);
+    if (!focalPerson) return;
 
     const { directPath, allRelatedInPath } = dataService.getEntireAncestryPath(focalId);
     const directPathIds = new Set(directPath.map(p => p.id));
@@ -504,13 +583,13 @@ export class TreeRenderer {
 
     pedigreeWrapper.innerHTML = `
       <div class="pedigree-banner">
-        <div class="pedigree-info">
-          <span class="gen-tag">PEDIGREE FOCUS VIEW</span>
-          <h2 class="pedigree-title">Ancestral Lineage of <strong>${focal.fullName}</strong></h2>
-          <p class="pedigree-subtitle">Tracing ancestral path upwards to <strong>Periya Pannai</strong> and immediate descendants downwards.</p>
+        <div>
+          <span class="gen-tag">Ancestral Pedigree Focus</span>
+          <div class="pedigree-title">${focalPerson.fullName} ${focalPerson.tamilName ? `(${focalPerson.tamilName})` : ''}</div>
+          <div class="pedigree-subtitle">Direct ancestral bloodline traced back to lineage roots.</div>
         </div>
-        <button class="btn-auth" id="btnExitPedigree" style="padding: 8px 16px; font-size: 12px;">
-          🌳 Return to Full Tree
+        <button class="btn-auth" id="btnExitPedigree" style="padding: 6px 14px; font-size: 12px;">
+          ← Back to Tree Chart
         </button>
       </div>
 
@@ -583,69 +662,69 @@ export class TreeRenderer {
 
     pedigreeWrapper.querySelector('#btnExitPedigree')?.addEventListener('click', () => {
       this.viewMode = 'TREE';
-      this.focalMemberId = null;
       this.render();
       this.resetView();
+      document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('tabTree')?.classList.add('active');
     });
 
     this.htmlLayer.appendChild(pedigreeWrapper);
   }
 
   // ==========================================================================
-  // VIEW MODE 3: GENERATIONAL MATRIX (TIER OVERVIEW)
+  // VIEW MODE 3: GENERATION MATRIX OVERVIEW
   // ==========================================================================
 
-  private renderGenerationalMatrix(): void {
-    const genMap = dataService.getGenerationsMap();
+  private renderMatrixView(): void {
     const matrixWrapper = document.createElement('div');
     matrixWrapper.className = 'matrix-container';
+
+    const genMap = dataService.getGenerationsMap();
 
     for (let gen = 1; gen <= 6; gen++) {
       if (this.filterGeneration !== 'ALL' && Number(this.filterGeneration) !== gen) continue;
 
-      const members = genMap.get(gen) || [];
-      const filtered = members.filter(m => {
-        if (this.filterBranch === 'ALL') return true;
-        const b = (m.branch || '').toLowerCase();
-        return b.includes(this.filterBranch.toLowerCase());
-      });
+      let members = genMap.get(gen) || [];
+      if (this.filterBranch !== 'ALL') {
+        members = members.filter(m => m.branch === this.filterBranch);
+      }
 
-      if (filtered.length === 0) continue;
+      if (members.length === 0) continue;
 
       const row = document.createElement('div');
       row.className = 'generation-row';
       row.innerHTML = `
         <div class="generation-label">
-          <span class="gen-tag">Gen ${gen}</span>
-          <span class="gen-title">${this.getGenerationTitle(gen)} (${filtered.length} members)</span>
+          <span class="gen-tag">Tier ${gen}</span>
+          <span class="gen-title">${this.getGenerationTitle(gen)}</span>
+          <span class="badge-tag">${members.length} members</span>
         </div>
-        <div class="nodes-track" id="matrixTrack_${gen}"></div>
+        <div class="nodes-track" id="track_gen_${gen}"></div>
       `;
 
-      const track = row.querySelector(`#matrixTrack_${gen}`) as HTMLElement;
+      const track = row.querySelector(`#track_gen_${gen}`) as HTMLElement;
       const rendered = new Set<number>();
 
-      filtered.forEach(person => {
+      members.forEach(person => {
         if (rendered.has(person.id)) return;
 
         const spouses = dataService.getSpouses(person.id);
-        const spouseInSameGen = spouses.find(s => s.generation === person.generation && filtered.some(fm => fm.id === s.id));
+        const spouseInSameGen = spouses.find(s => members.some(m => m.id === s.id));
 
-        if (spouseInSameGen) {
-          const coupleUnit = document.createElement('div');
-          coupleUnit.className = 'couple-unit';
+        if (spouseInSameGen && !rendered.has(spouseInSameGen.id)) {
+          const couple = document.createElement('div');
+          couple.className = 'couple-unit';
           
-          const primaryCard = this.createNodeCard(person);
-          const heartBadge = document.createElement('div');
-          heartBadge.className = 'marriage-ring-badge';
-          heartBadge.innerHTML = '💍';
+          const c1 = this.createNodeCard(person);
+          const ring = document.createElement('div');
+          ring.className = 'marriage-ring-badge';
+          ring.innerHTML = '💍';
+          const c2 = this.createNodeCard(spouseInSameGen);
 
-          const spouseCard = this.createNodeCard(spouseInSameGen);
-
-          coupleUnit.appendChild(primaryCard);
-          coupleUnit.appendChild(heartBadge);
-          coupleUnit.appendChild(spouseCard);
-          track.appendChild(coupleUnit);
+          couple.appendChild(c1);
+          couple.appendChild(ring);
+          couple.appendChild(c2);
+          track.appendChild(couple);
 
           rendered.add(person.id);
           rendered.add(spouseInSameGen.id);
@@ -696,41 +775,36 @@ export class TreeRenderer {
         <button class="node-btn btn-profile" data-action="profile" title="View Full Profile">
           👤 Profile
         </button>
-        <button class="node-btn btn-lineage" data-action="lineage" title="Focus Ancestral Tree">
+        <button class="node-btn btn-lineage" data-action="lineage" title="View Family Tree">
           🌳 Tree
         </button>
       </div>
     `;
 
-    // Click on Card Body: Focus / Select
+    // Click on Card Body: Highlight node (DO NOT OPEN DRAWER)
     card.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       if (target.closest('.node-btn')) return;
       e.stopPropagation();
-      this.selectNode(person.id);
+      this.selectNode(person.id, false);
     });
 
-    // Button 1: Profile Drawer
+    // Button 1: Profile Drawer (EXPLICITLY OPENS DRAWER)
     card.querySelector('.btn-profile')?.addEventListener('click', (e) => {
       e.stopPropagation();
-      this.selectNode(person.id);
+      this.selectNode(person.id, true);
     });
 
-    // Button 2: Tree Focus & Center
+    // Button 2: Tree Focus (SHOWS HER/HIS SPECIFIC TREE, DOES NOT OPEN DRAWER)
     card.querySelector('.btn-lineage')?.addEventListener('click', (e) => {
       e.stopPropagation();
-      if (this.viewMode === 'TREE') {
-        this.selectNode(person.id);
-        this.centerOnNode(person.id);
-      } else {
-        this.focusPedigree(person.id);
-      }
+      this.showFamilyTree(person.id);
     });
 
     return card;
   }
 
-  selectNode(id: number | string): void {
+  selectNode(id: number | string, openDrawer = true): void {
     this.selectedId = Number(id);
 
     document.querySelectorAll('.node-card').forEach(n => n.classList.remove('selected'));
@@ -738,8 +812,10 @@ export class TreeRenderer {
     if (active) active.classList.add('selected');
 
     const person = dataService.getIndividual(id);
-    if (person && this.onNodeSelect) {
-      this.onNodeSelect(person);
+    if (person) {
+      if (openDrawer && this.onNodeSelect) {
+        this.onNodeSelect(person);
+      }
       trackEvent('interaction', 'node_focus', { id: person.id, name: person.fullName });
     }
   }

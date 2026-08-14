@@ -7,7 +7,7 @@ import { trackEvent } from './services/telemetryService.ts';
 let treeRenderer: TreeRenderer | null = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await dataService.load();
+  dataService.load();
 
   const treeContainer = document.getElementById('treeContainer') as HTMLElement;
   treeRenderer = new TreeRenderer(treeContainer, handleNodeSelection);
@@ -136,7 +136,7 @@ function handleNodeSelection(rawPerson: Individual): void {
         <span class="badge-tag">${person.isLiving ? '🟢 Living' : '⚪ Deceased'}</span>
       </div>
       <button class="btn-auth" id="btnFocusPedigree" style="margin-top: 14px; width: 100%; justify-content: center;">
-        🔍 Focus Lineage & Ancestry
+        🌳 Trace Full Ancestral Lineage
       </button>
     </div>
 
@@ -144,7 +144,7 @@ function handleNodeSelection(rawPerson: Individual): void {
     <div class="drawer-section">
       <div class="drawer-section-title">Parents</div>
       <div class="relation-chips" id="parentsChips">
-        ${parents.length > 0 ? parents.map(p => `<button class="rel-chip" data-id="${p.id}">${p.fullName}</button>`).join('') : '<span style="font-size: 13px; color: #64748b;">Not recorded</span>'}
+        ${parents.length > 0 ? parents.map(p => `<button class="rel-chip" data-id="${p.id}">${p.fullName}</button>`).join('') : '<span style="font-size: 13px; color: #64748b;">Ancestral roots</span>'}
       </div>
     </div>
 
@@ -202,7 +202,7 @@ function handleNodeSelection(rawPerson: Individual): void {
     <!-- Biographical Notes -->
     ${person.notes ? `
       <div class="drawer-section">
-        <div class="drawer-section-title">Family History & Notes</div>
+        <div class="drawer-section-title">Family History & Identity Clues</div>
         <div style="background: #1e293b; padding: 12px; border-radius: 8px; font-size: 13px; color: #cbd5e1; line-height: 1.6;">
           ${person.notes}
         </div>
@@ -211,7 +211,7 @@ function handleNodeSelection(rawPerson: Individual): void {
   `;
 
   drawerBody.querySelector('#btnFocusPedigree')?.addEventListener('click', () => {
-    if (treeRenderer) treeRenderer.setFocusView(person.id);
+    if (treeRenderer) treeRenderer.traceFullLineage(person.id);
     drawer.classList.remove('open');
   });
 
@@ -297,7 +297,10 @@ function setupAuthModal(): void {
     btnSendQuickOtp.disabled = true;
 
     try {
-      const otpRes = await auth.requestDirectOtp(email); if (otpRes && otpRes.devOtp) { (document.getElementById("quickOtpCode") as HTMLInputElement).value = otpRes.devOtp; alert(`Dev OTP code: ${otpRes.devOtp}`); }
+      const otpRes = await auth.requestDirectOtp(email);
+      if (otpRes && otpRes.devOtp) {
+        quickOtpCode.value = otpRes.devOtp;
+      }
       currentOtpEmail = email;
       quickOtpForm.classList.add('hidden');
       quickOtpVerifyStep.classList.remove('hidden');

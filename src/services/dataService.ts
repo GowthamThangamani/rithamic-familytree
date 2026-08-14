@@ -15,7 +15,7 @@ class DataService {
 
       const rawList: any[] = rawData.persons || rawData.individuals || [];
 
-      // 1. Initial Person Ingestion
+      // 1. Initial Ingestion
       rawList.forEach((p: any) => {
         const spouses = (p.spouses || []).map((s: any) => (typeof s === 'object' && s !== null ? s.spouseId : s)).filter(Boolean);
         const parents = (p.parents || []).map((s: any) => (typeof s === 'object' && s !== null ? s.id : s)).filter(Boolean);
@@ -47,7 +47,7 @@ class DataService {
         this.individualsMap.set(ind.id, ind);
       });
 
-      // 2. Bidirectional Relationship Enrichment from relationships array
+      // 2. Bidirectional Enrichment from relationships array
       const rawRelationships: any[] = rawData.relationships || [];
       rawRelationships.forEach((r: any) => {
         if (r.type === 'spouse') {
@@ -63,7 +63,24 @@ class DataService {
         }
       });
 
-      // 3. Normalize Siblings across shared parents
+      // 3. Parental Marriage Linkage (Connect children to both married parents)
+      this.individualsMap.forEach((ind) => {
+        if (ind.parents && ind.parents.length > 0) {
+          const currentParents = [...ind.parents];
+          currentParents.forEach((pid) => {
+            const parent = this.individualsMap.get(pid);
+            if (parent && parent.spouses) {
+              parent.spouses.forEach((sid) => {
+                if (!ind.parents?.includes(sid)) ind.parents?.push(sid);
+                const spouse = this.individualsMap.get(sid);
+                if (spouse && !spouse.children?.includes(ind.id)) spouse.children?.push(ind.id);
+              });
+            }
+          });
+        }
+      });
+
+      // 4. Normalize Siblings across shared parents
       this.individualsMap.forEach((ind) => {
         if (ind.parents && ind.parents.length > 0) {
           ind.parents.forEach((pid) => {
@@ -185,6 +202,46 @@ class DataService {
       }
     }
     return descendants;
+  }
+
+  /**
+   * Traces all direct path ancestors up to root (Periya Pannai) and returns ordered tiers
+   */
+  getEntireAncestryPath(personId: number | string): { directPath: Individual[]; allRelatedInPath: Individual[] } {
+    if (!this.isLoaded) this.load();
+    const focal = this.getIndividual(personId);
+    if (!focal) return { directPath: [], allRelatedInPath: [] };
+
+    const directPathSet = new Set<number>([focal.id]);
+    const queue = [focal.id];
+
+    while (queue.length > 0) {
+      const currId = queue.shift()!;
+      const curr = this.getIndividual(currId);
+      if (!curr) continue;
+
+      (curr.parents || []).forEach(pid => {
+        if (!directPathSet.has(pid)) {
+          directPathSet.add(pid);
+          queue.push(pid);
+        }
+      });
+    }
+
+    const allRelatedSet = new Set<number>(directPathSet);
+    directPathSet.forEach(aid => {
+      const a = this.getIndividual(aid);
+      if (a) {
+        (a.spouses || []).forEach(sid => allRelatedSet.add(sid));
+        (a.children || []).forEach(cid => allRelatedSet.add(cid));
+        (a.siblings || []).forEach(sibid => allRelatedSet.add(sibid));
+      }
+    });
+
+    const directPath = Array.from(directPathSet).map(id => this.getIndividual(id)!).filter(Boolean);
+    const allRelatedInPath = Array.from(allRelatedSet).map(id => this.getIndividual(id)!).filter(Boolean);
+
+    return { directPath, allRelatedInPath };
   }
 
   search(query: string): SearchMatch[] {

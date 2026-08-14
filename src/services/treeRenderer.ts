@@ -17,8 +17,8 @@ export class TreeRenderer {
   public selectedId: number | null = null;
   public filterBranch = 'ALL';
   public filterGeneration = 'ALL';
-  public viewMode: 'FULL' | 'FOCUS' = 'FULL';
-  public focusNodeId: number | null = null;
+  public viewMode: 'FULL' | 'LINEAGE_TRACE' = 'FULL';
+  public focalMemberId: number | null = null;
 
   constructor(containerElement: HTMLElement, onNodeSelect: (person: Individual) => void) {
     this.container = containerElement;
@@ -104,8 +104,8 @@ export class TreeRenderer {
     this.filterGeneration = generationFilter;
     this.canvas.innerHTML = '';
 
-    if (this.viewMode === 'FOCUS' && this.focusNodeId) {
-      this.renderFocusView(this.focusNodeId);
+    if (this.viewMode === 'LINEAGE_TRACE' && this.focalMemberId) {
+      this.renderFullLineageTraceView(this.focalMemberId);
     } else {
       this.renderFullHierarchy();
     }
@@ -153,7 +153,6 @@ export class TreeRenderer {
         const spouseInSameGen = spouses.find(s => s.generation === person.generation && filteredMembers.some(fm => fm.id === s.id));
 
         if (spouseInSameGen) {
-          // Render as Couple Unit
           const coupleUnit = document.createElement('div');
           coupleUnit.className = 'couple-unit';
           
@@ -194,101 +193,115 @@ export class TreeRenderer {
     this.canvas.appendChild(treeWrapper);
   }
 
-  private renderFocusView(centerId: number): void {
-    const person = dataService.getIndividual(centerId);
-    if (!person) return;
+  /**
+   * Renders the complete ancestral tree from the root ancestors down to focal person + all branch points of conflict
+   */
+  private renderFullLineageTraceView(focalId: number): void {
+    const focal = dataService.getIndividual(focalId);
+    if (!focal) return;
 
-    const spouses = dataService.getSpouses(centerId);
-    const ancestors = dataService.getAncestors(centerId);
-    const descendants = dataService.getDescendants(centerId);
+    const { directPath, allRelatedInPath } = dataService.getEntireAncestryPath(focalId);
+    const directPathIds = new Set(directPath.map(p => p.id));
 
-    const focusContainer = document.createElement('div');
-    focusContainer.className = 'focus-pedigree-container';
+    const traceContainer = document.createElement('div');
+    traceContainer.className = 'trace-lineage-container';
 
-    focusContainer.innerHTML = `
-      <div class="focus-bar">
-        <div class="focus-title-group">
-          <span class="focus-badge">FOCUS PEDIGREE</span>
-          <span class="focus-title">Lineage of <strong>${person.fullName}</strong></span>
+    traceContainer.innerHTML = `
+      <div class="trace-header-banner">
+        <div class="trace-info">
+          <span class="trace-badge">COMPLETE ANCESTRY TRACE</span>
+          <h2 class="trace-title">Ancestral Lineage of <strong>${focal.fullName}</strong></h2>
+          <p class="trace-subtitle">Tracing direct roots up to <strong>Periya Pannai</strong>, showing parental marriages and divergence points.</p>
         </div>
-        <button class="btn-exit-focus" id="btnExitFocus">← Back to Full Family Tree</button>
+        <button class="btn-exit-focus" id="btnExitTrace">← View Full Family Tree</button>
       </div>
 
-      <!-- Ancestors Section -->
-      <div class="pedigree-section" id="ancestorsSection">
-        <div class="pedigree-heading-box">
-          <span class="pedigree-icon">▲</span>
-          <h4 class="pedigree-heading">Direct Ancestors & Parents</h4>
-        </div>
-        <div class="pedigree-row" id="ancestorRow"></div>
+      <div class="conflict-legend-bar">
+        <div class="legend-item"><span class="legend-dot gold"></span> <strong>Direct Path to ${focal.fullName}</strong></div>
+        <div class="legend-item"><span class="legend-dot blue"></span> Velusamy Branch</div>
+        <div class="legend-item"><span class="legend-dot green"></span> Anna Anban Branch (Divergence)</div>
+        <div class="legend-item"><span class="legend-dot purple"></span> Palanivel Branch (Divergence)</div>
       </div>
 
-      <!-- Focal Member & Spouse Section -->
-      <div class="pedigree-section focal-section">
-        <div class="pedigree-heading-box">
-          <span class="pedigree-icon">★</span>
-          <h4 class="pedigree-heading">Selected Member & Spouse</h4>
-        </div>
-        <div class="pedigree-row" id="focalRow"></div>
-      </div>
-
-      <!-- Descendants Section -->
-      <div class="pedigree-section" id="descendantsSection">
-        <div class="pedigree-heading-box">
-          <span class="pedigree-icon">▼</span>
-          <h4 class="pedigree-heading">Children & Descendants</h4>
-        </div>
-        <div class="pedigree-row" id="descendantRow"></div>
-      </div>
+      <div class="trace-tree-body" id="traceTreeBody"></div>
     `;
 
-    // 1. Ancestors
-    const ancestorRow = focusContainer.querySelector('#ancestorRow') as HTMLElement;
-    if (ancestors.length === 0) {
-      ancestorRow.innerHTML = '<p class="text-muted" style="color: #64748b; font-size: 13px; padding: 8px;">No earlier ancestors recorded</p>';
-    } else {
-      ancestors.forEach(a => ancestorRow.appendChild(this.createNodeCard(a)));
-    }
+    const body = traceContainer.querySelector('#traceTreeBody') as HTMLElement;
 
-    // 2. Focal Member + Spouse (Couple Unit)
-    const focalRow = focusContainer.querySelector('#focalRow') as HTMLElement;
-    const coupleUnit = document.createElement('div');
-    coupleUnit.className = 'couple-unit focal-couple';
-    coupleUnit.appendChild(this.createNodeCard(person, true));
+    // Group related members into generations
+    const genGroups = new Map<number, Individual[]>();
+    for (let g = 1; g <= 6; g++) genGroups.set(g, []);
 
-    if (spouses.length > 0) {
-      const ring = document.createElement('div');
-      ring.className = 'marriage-ring-badge';
-      ring.innerHTML = '💍';
-      coupleUnit.appendChild(ring);
+    allRelatedInPath.forEach(ind => {
+      const g = ind.generation || 1;
+      if (!genGroups.has(g)) genGroups.set(g, []);
+      genGroups.get(g)!.push(ind);
+    });
 
-      spouses.forEach(sp => {
-        coupleUnit.appendChild(this.createNodeCard(sp, false));
+    for (let g = 1; g <= 6; g++) {
+      const membersInGen = genGroups.get(g) || [];
+      if (membersInGen.length === 0) continue;
+
+      const row = document.createElement('div');
+      row.className = 'trace-gen-row';
+      row.innerHTML = `
+        <div class="trace-gen-sidebar">
+          <span class="gen-tag">Tier ${g}</span>
+          <span class="gen-title">${this.getGenerationTitle(g)}</span>
+        </div>
+        <div class="trace-track" id="traceTrack_${g}"></div>
+      `;
+
+      const track = row.querySelector(`#traceTrack_${g}`) as HTMLElement;
+      const rendered = new Set<number>();
+
+      membersInGen.forEach(person => {
+        if (rendered.has(person.id)) return;
+
+        const isDirect = directPathIds.has(person.id);
+        const spouses = dataService.getSpouses(person.id);
+        const spouseInGen = spouses.find(s => membersInGen.some(m => m.id === s.id));
+
+        if (spouseInGen) {
+          const couple = document.createElement('div');
+          couple.className = `couple-unit ${isDirect ? 'direct-path-couple' : ''}`;
+          
+          const c1 = this.createNodeCard(person, person.id === focalId, isDirect);
+          const ring = document.createElement('div');
+          ring.className = 'marriage-ring-badge';
+          ring.innerHTML = '💍';
+          const c2 = this.createNodeCard(spouseInGen, spouseInGen.id === focalId, directPathIds.has(spouseInGen.id));
+
+          couple.appendChild(c1);
+          couple.appendChild(ring);
+          couple.appendChild(c2);
+
+          track.appendChild(couple);
+          rendered.add(person.id);
+          rendered.add(spouseInGen.id);
+        } else {
+          const card = this.createNodeCard(person, person.id === focalId, isDirect);
+          track.appendChild(card);
+          rendered.add(person.id);
+        }
       });
-    }
-    focalRow.appendChild(coupleUnit);
 
-    // 3. Descendants
-    const descendantRow = focusContainer.querySelector('#descendantRow') as HTMLElement;
-    if (descendants.length === 0) {
-      descendantRow.innerHTML = '<p class="text-muted" style="color: #64748b; font-size: 13px; padding: 8px;">No recorded descendants</p>';
-    } else {
-      descendants.forEach(d => descendantRow.appendChild(this.createNodeCard(d)));
+      body.appendChild(row);
     }
 
-    focusContainer.querySelector('#btnExitFocus')?.addEventListener('click', () => {
+    traceContainer.querySelector('#btnExitTrace')?.addEventListener('click', () => {
       this.viewMode = 'FULL';
-      this.focusNodeId = null;
+      this.focalMemberId = null;
       this.render();
       this.fitToScreen();
     });
 
-    this.canvas.appendChild(focusContainer);
+    this.canvas.appendChild(traceContainer);
   }
 
-  createNodeCard(person: Individual, isFocal = false): HTMLElement {
+  createNodeCard(person: Individual, isFocal = false, isDirectPath = false): HTMLElement {
     const card = document.createElement('div');
-    card.className = `node-card ${person.gender} ${isFocal ? 'focal-node' : ''} ${this.selectedId === person.id ? 'selected' : ''}`;
+    card.className = `node-card ${person.gender} ${isFocal ? 'focal-node' : ''} ${isDirectPath ? 'direct-path-node' : ''} ${this.selectedId === person.id ? 'selected' : ''}`;
     card.id = `node_${person.id}`;
     card.dataset.id = String(person.id);
 
@@ -308,11 +321,34 @@ export class TreeRenderer {
           </div>
         </div>
       </div>
+      <div class="node-actions-bar">
+        <button class="node-btn btn-profile" data-action="profile" title="View Full Profile">
+          👤 Profile
+        </button>
+        <button class="node-btn btn-lineage" data-action="lineage" title="Trace Complete Lineage & Tree">
+          🌳 Lineage Tree
+        </button>
+      </div>
     `;
 
+    // Click on Card Body: Focus / Select
     card.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('.node-btn')) return; // handled separately
       e.stopPropagation();
       this.selectNode(person.id);
+    });
+
+    // Button 1: Profile Drawer
+    card.querySelector('.btn-profile')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.selectNode(person.id);
+    });
+
+    // Button 2: Full Lineage Trace
+    card.querySelector('.btn-lineage')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.traceFullLineage(person.id);
     });
 
     return card;
@@ -332,21 +368,22 @@ export class TreeRenderer {
     }
   }
 
-  setFocusView(id: number | string): void {
-    this.viewMode = 'FOCUS';
-    this.focusNodeId = Number(id);
+  traceFullLineage(id: number | string): void {
+    this.viewMode = 'LINEAGE_TRACE';
+    this.focalMemberId = Number(id);
     this.render();
     this.resetView();
+    trackEvent('interaction', 'lineage_trace', { id: Number(id) });
   }
 
   private getGenerationTitle(gen: number): string {
     const titles: Record<number, string> = {
-      1: "1st Generation – Forefathers & Roots",
-      2: "2nd Generation – Lineage Elders",
-      3: "3rd Generation – Patriarchs & Matriarchs",
-      4: "4th Generation – Senior Family Members",
-      5: "5th Generation – Contemporary Generation",
-      6: "6th Generation – Children & Next Lineage"
+      1: "1st Generation – Forefathers & Ancestral Roots",
+      2: "2nd Generation – Lineage Elders & Patriarchs",
+      3: "3rd Generation – Branch Patriarchs & Matriarchs",
+      4: "4th Generation – Senior Family Lineage",
+      5: "5th Generation – Contemporary Family Members",
+      6: "6th Generation – Children & Next Generation"
     };
     return titles[gen] || `Generation ${gen}`;
   }

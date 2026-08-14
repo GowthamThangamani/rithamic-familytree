@@ -8,7 +8,7 @@ export class TreeRenderer {
   private canvas!: HTMLElement;
   private onNodeSelect: (person: Individual) => void;
 
-  public zoom = 1;
+  public zoom = 0.95;
   public panX = 40;
   public panY = 40;
   private isDragging = false;
@@ -41,7 +41,7 @@ export class TreeRenderer {
 
   private setupPanAndZoom(): void {
     this.viewport.addEventListener('mousedown', (e) => {
-      if ((e.target as HTMLElement).closest('.node-card')) return;
+      if ((e.target as HTMLElement).closest('.node-card') || (e.target as HTMLElement).closest('button')) return;
       this.isDragging = true;
       this.startX = e.clientX - this.panX;
       this.startY = e.clientY - this.panY;
@@ -62,7 +62,7 @@ export class TreeRenderer {
 
     this.viewport.addEventListener('wheel', (e) => {
       e.preventDefault();
-      const zoomFactor = 1.1;
+      const zoomFactor = 1.08;
       if (e.deltaY < 0) {
         this.zoomIn(zoomFactor);
       } else {
@@ -71,12 +71,12 @@ export class TreeRenderer {
     }, { passive: false });
   }
 
-  zoomIn(factor = 1.2): void {
+  zoomIn(factor = 1.15): void {
     this.zoom = Math.min(this.zoom * factor, 2.5);
     this.updateTransform();
   }
 
-  zoomOut(factor = 1.2): void {
+  zoomOut(factor = 1.15): void {
     this.zoom = Math.max(this.zoom / factor, 0.35);
     this.updateTransform();
   }
@@ -142,9 +142,42 @@ export class TreeRenderer {
       `;
 
       const track = row.querySelector(`#genTrack_${gen}`) as HTMLElement;
+      
+      // Group couples side by side
+      const renderedInGen = new Set<number>();
+
       filteredMembers.forEach(person => {
-        const node = this.createNodeCard(person);
-        track.appendChild(node);
+        if (renderedInGen.has(person.id)) return;
+
+        const spouses = dataService.getSpouses(person.id);
+        const spouseInSameGen = spouses.find(s => s.generation === person.generation && filteredMembers.some(fm => fm.id === s.id));
+
+        if (spouseInSameGen) {
+          // Render as Couple Unit
+          const coupleUnit = document.createElement('div');
+          coupleUnit.className = 'couple-unit';
+          
+          const primaryCard = this.createNodeCard(person);
+          const heartBadge = document.createElement('div');
+          heartBadge.className = 'marriage-ring-badge';
+          heartBadge.innerHTML = '💍';
+          heartBadge.title = `Married: ${person.fullName} & ${spouseInSameGen.fullName}`;
+
+          const spouseCard = this.createNodeCard(spouseInSameGen);
+
+          coupleUnit.appendChild(primaryCard);
+          coupleUnit.appendChild(heartBadge);
+          coupleUnit.appendChild(spouseCard);
+
+          track.appendChild(coupleUnit);
+
+          renderedInGen.add(person.id);
+          renderedInGen.add(spouseInSameGen.id);
+        } else {
+          const node = this.createNodeCard(person);
+          track.appendChild(node);
+          renderedInGen.add(person.id);
+        }
       });
 
       treeWrapper.appendChild(row);
@@ -165,6 +198,7 @@ export class TreeRenderer {
     const person = dataService.getIndividual(centerId);
     if (!person) return;
 
+    const spouses = dataService.getSpouses(centerId);
     const ancestors = dataService.getAncestors(centerId);
     const descendants = dataService.getDescendants(centerId);
 
@@ -173,36 +207,71 @@ export class TreeRenderer {
 
     focusContainer.innerHTML = `
       <div class="focus-bar">
-        <span class="focus-title">Focus Lineage: <strong>${person.fullName}</strong></span>
-        <button class="btn-exit-focus" id="btnExitFocus">← View Full Family Tree</button>
+        <div class="focus-title-group">
+          <span class="focus-badge">FOCUS PEDIGREE</span>
+          <span class="focus-title">Lineage of <strong>${person.fullName}</strong></span>
+        </div>
+        <button class="btn-exit-focus" id="btnExitFocus">← Back to Full Family Tree</button>
       </div>
+
+      <!-- Ancestors Section -->
       <div class="pedigree-section" id="ancestorsSection">
-        <h4 class="pedigree-heading">Ancestors & Parents</h4>
+        <div class="pedigree-heading-box">
+          <span class="pedigree-icon">▲</span>
+          <h4 class="pedigree-heading">Direct Ancestors & Parents</h4>
+        </div>
         <div class="pedigree-row" id="ancestorRow"></div>
       </div>
+
+      <!-- Focal Member & Spouse Section -->
       <div class="pedigree-section focal-section">
-        <h4 class="pedigree-heading">Selected Member</h4>
+        <div class="pedigree-heading-box">
+          <span class="pedigree-icon">★</span>
+          <h4 class="pedigree-heading">Selected Member & Spouse</h4>
+        </div>
         <div class="pedigree-row" id="focalRow"></div>
       </div>
+
+      <!-- Descendants Section -->
       <div class="pedigree-section" id="descendantsSection">
-        <h4 class="pedigree-heading">Children & Descendants</h4>
+        <div class="pedigree-heading-box">
+          <span class="pedigree-icon">▼</span>
+          <h4 class="pedigree-heading">Children & Descendants</h4>
+        </div>
         <div class="pedigree-row" id="descendantRow"></div>
       </div>
     `;
 
+    // 1. Ancestors
     const ancestorRow = focusContainer.querySelector('#ancestorRow') as HTMLElement;
     if (ancestors.length === 0) {
-      ancestorRow.innerHTML = '<p class="text-muted" style="color: #64748b; font-size: 13px;">No earlier ancestors recorded</p>';
+      ancestorRow.innerHTML = '<p class="text-muted" style="color: #64748b; font-size: 13px; padding: 8px;">No earlier ancestors recorded</p>';
     } else {
       ancestors.forEach(a => ancestorRow.appendChild(this.createNodeCard(a)));
     }
 
+    // 2. Focal Member + Spouse (Couple Unit)
     const focalRow = focusContainer.querySelector('#focalRow') as HTMLElement;
-    focalRow.appendChild(this.createNodeCard(person, true));
+    const coupleUnit = document.createElement('div');
+    coupleUnit.className = 'couple-unit focal-couple';
+    coupleUnit.appendChild(this.createNodeCard(person, true));
 
+    if (spouses.length > 0) {
+      const ring = document.createElement('div');
+      ring.className = 'marriage-ring-badge';
+      ring.innerHTML = '💍';
+      coupleUnit.appendChild(ring);
+
+      spouses.forEach(sp => {
+        coupleUnit.appendChild(this.createNodeCard(sp, false));
+      });
+    }
+    focalRow.appendChild(coupleUnit);
+
+    // 3. Descendants
     const descendantRow = focusContainer.querySelector('#descendantRow') as HTMLElement;
     if (descendants.length === 0) {
-      descendantRow.innerHTML = '<p class="text-muted" style="color: #64748b; font-size: 13px;">No recorded descendants</p>';
+      descendantRow.innerHTML = '<p class="text-muted" style="color: #64748b; font-size: 13px; padding: 8px;">No recorded descendants</p>';
     } else {
       descendants.forEach(d => descendantRow.appendChild(this.createNodeCard(d)));
     }
@@ -234,7 +303,7 @@ export class TreeRenderer {
           <div class="node-name">${person.fullName}</div>
           ${person.tamilName ? `<div class="node-tamil">${person.tamilName}</div>` : ''}
           <div class="node-meta">
-            <span class="node-lifespan">${person.birthYear || (person.isLiving ? 'Living' : 'Deceased')}</span>
+            <span class="node-lifespan">${person.birthYear ? `b. ${person.birthYear}` : (person.isLiving ? 'Living' : 'Deceased')}</span>
             ${person.nativePlace ? `<span class="node-place">📍 ${person.nativePlace.split(',')[0]}</span>` : ''}
           </div>
         </div>

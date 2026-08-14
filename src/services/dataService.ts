@@ -15,7 +15,13 @@ class DataService {
 
       const rawList: any[] = rawData.persons || rawData.individuals || [];
 
+      // 1. Initial Person Ingestion
       rawList.forEach((p: any) => {
+        const spouses = (p.spouses || []).map((s: any) => (typeof s === 'object' && s !== null ? s.spouseId : s)).filter(Boolean);
+        const parents = (p.parents || []).map((s: any) => (typeof s === 'object' && s !== null ? s.id : s)).filter(Boolean);
+        const children = (p.children || []).map((s: any) => (typeof s === 'object' && s !== null ? s.id : s)).filter(Boolean);
+        const siblings = (p.siblings || []).map((s: any) => (typeof s === 'object' && s !== null ? s.id : s)).filter(Boolean);
+
         const ind: Individual = {
           id: p.id,
           fullName: p.fullName,
@@ -31,14 +37,46 @@ class DataService {
           address: p.addresses && p.addresses.length > 0 ? p.addresses[0].value : (p.address || null),
           occupation: p.occupation || null,
           notes: p.identityClues?.searchDescriptor || p.notes || '',
-          parents: p.parents || [],
-          spouses: p.spouses || [],
-          children: p.children || [],
-          siblings: p.siblings || [],
+          parents,
+          spouses,
+          children,
+          siblings,
           identityClues: p.identityClues
         };
 
         this.individualsMap.set(ind.id, ind);
+      });
+
+      // 2. Bidirectional Relationship Enrichment from relationships array
+      const rawRelationships: any[] = rawData.relationships || [];
+      rawRelationships.forEach((r: any) => {
+        if (r.type === 'spouse') {
+          const a = this.individualsMap.get(r.personAId);
+          const b = this.individualsMap.get(r.personBId);
+          if (a && !a.spouses?.includes(r.personBId)) a.spouses?.push(r.personBId);
+          if (b && !b.spouses?.includes(r.personAId)) b.spouses?.push(r.personAId);
+        } else if (r.type === 'parent_child') {
+          const p = this.individualsMap.get(r.parentPersonId);
+          const c = this.individualsMap.get(r.childPersonId);
+          if (p && !p.children?.includes(r.childPersonId)) p.children?.push(r.childPersonId);
+          if (c && !c.parents?.includes(r.parentPersonId)) c.parents?.push(r.parentPersonId);
+        }
+      });
+
+      // 3. Normalize Siblings across shared parents
+      this.individualsMap.forEach((ind) => {
+        if (ind.parents && ind.parents.length > 0) {
+          ind.parents.forEach((pid) => {
+            const parent = this.individualsMap.get(pid);
+            if (parent && parent.children) {
+              parent.children.forEach((cid) => {
+                if (cid !== ind.id && !ind.siblings?.includes(cid)) {
+                  ind.siblings?.push(cid);
+                }
+              });
+            }
+          });
+        }
       });
 
       this.isLoaded = true;
@@ -60,19 +98,25 @@ class DataService {
   getParents(id: number | string): Individual[] {
     const person = this.getIndividual(id);
     if (!person || !person.parents) return [];
-    return person.parents.map(pid => this.getIndividual(pid)).filter((p): p is Individual => Boolean(p));
+    return person.parents
+      .map(pid => this.getIndividual(pid))
+      .filter((p): p is Individual => Boolean(p));
   }
 
   getChildren(id: number | string): Individual[] {
     const person = this.getIndividual(id);
     if (!person || !person.children) return [];
-    return person.children.map(cid => this.getIndividual(cid)).filter((c): c is Individual => Boolean(c));
+    return person.children
+      .map(cid => this.getIndividual(cid))
+      .filter((c): c is Individual => Boolean(c));
   }
 
   getSpouses(id: number | string): Individual[] {
     const person = this.getIndividual(id);
     if (!person || !person.spouses) return [];
-    return person.spouses.map(sid => this.getIndividual(sid)).filter((s): s is Individual => Boolean(s));
+    return person.spouses
+      .map(sid => this.getIndividual(sid))
+      .filter((s): s is Individual => Boolean(s));
   }
 
   getSiblings(id: number | string): Individual[] {
@@ -80,7 +124,9 @@ class DataService {
     if (!person) return [];
 
     if (person.siblings && person.siblings.length > 0) {
-      return person.siblings.map(sid => this.getIndividual(sid)).filter((s): s is Individual => Boolean(s));
+      return person.siblings
+        .map(sid => this.getIndividual(sid))
+        .filter((s): s is Individual => Boolean(s));
     }
 
     if (!person.parents || person.parents.length === 0) return [];
@@ -94,7 +140,9 @@ class DataService {
       }
     });
 
-    return Array.from(siblingIds).map(sid => this.getIndividual(sid)).filter((s): s is Individual => Boolean(s));
+    return Array.from(siblingIds)
+      .map(sid => this.getIndividual(sid))
+      .filter((s): s is Individual => Boolean(s));
   }
 
   getAncestors(id: number | string, maxDepth = 6): Individual[] {

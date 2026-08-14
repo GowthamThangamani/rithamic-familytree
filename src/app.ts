@@ -1,5 +1,6 @@
 import { Individual, SearchMatch } from './types/index.ts';
 import { dataService } from './services/dataService.ts';
+import { kinshipService } from './services/kinshipService.ts';
 import { auth } from './services/authService.ts';
 import { TreeRenderer } from './services/treeRenderer.ts';
 import { trackEvent } from './services/telemetryService.ts';
@@ -173,6 +174,8 @@ function handleNodeSelection(rawPerson: Individual): void {
   const siblings = dataService.getSiblings(person.id);
   const children = dataService.getChildren(person.id);
 
+  const activeFocalId = (treeRenderer && treeRenderer.focusedPersonId) || 1;
+  const kinship = kinshipService.calculateRelationship(activeFocalId, person.id);
   const initials = person.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 
   drawerBody.innerHTML = `
@@ -182,9 +185,16 @@ function handleNodeSelection(rawPerson: Individual): void {
       </div>
       <div class="drawer-name">${person.fullName}</div>
       ${person.tamilName ? `<div class="drawer-tamil">${person.tamilName}</div>` : ''}
-      <div style="margin-top: 8px;">
-        <span class="badge-tag" style="background: #f59e0b; color: #0f172a; font-weight: bold;">Gen ${person.generation}</span>
-        <span class="badge-tag">${person.isLiving ? '🟢 Living' : '⚪ Deceased'}</span>
+      <div style="margin-top: 8px; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+        <div style="display: flex; gap: 6px;">
+          <span class="badge-tag" style="background: #f59e0b; color: #0f172a; font-weight: bold;">Gen ${person.generation}</span>
+          <span class="badge-tag">${person.isLiving ? '🟢 Living' : '⚪ Deceased'}</span>
+        </div>
+        ${kinship ? `
+          <div class="node-kinship-pill ${kinship.relationType}" style="font-size: 11px; padding: 4px 10px;">
+            ${kinship.english} &bull; ${kinship.tamil}
+          </div>
+        ` : ''}
       </div>
       <button class="btn-auth" id="btnFocusPedigree" style="margin-top: 14px; width: 100%; justify-content: center;">
         🌳 Focus Tree

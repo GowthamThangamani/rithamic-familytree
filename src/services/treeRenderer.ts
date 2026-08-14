@@ -1,5 +1,6 @@
 import { Individual } from '../types/index.ts';
 import { dataService } from './dataService.ts';
+import { kinshipService } from './kinshipService.ts';
 import { trackEvent } from './telemetryService.ts';
 
 interface TreeNodeUnit {
@@ -37,6 +38,7 @@ export class TreeRenderer {
   public viewMode: 'TREE' | 'PEDIGREE' | 'MATRIX' = 'TREE';
   public focalMemberId: number | null = null;
   public focalTreeRootId: number | null = null;
+  public focusedPersonId: number = 1; // Default focal perspective (Gowtham #1)
   private collapsedNodes = new Set<number>();
 
   private readonly CARD_WIDTH = 230;
@@ -238,6 +240,7 @@ export class TreeRenderer {
   public showFamilyTree(personId: number): void {
     this.viewMode = 'TREE';
     this.focalTreeRootId = personId;
+    this.focusedPersonId = personId;
     this.render();
     this.centerOnNode(personId);
     trackEvent('interaction', 'view_family_tree', { id: personId });
@@ -248,6 +251,24 @@ export class TreeRenderer {
     this.render();
     this.fitToScreen();
     trackEvent('interaction', 'reset_tree_focus');
+  }
+
+  public updateAllKinshipPills(focalId: number): void {
+    this.focusedPersonId = focalId;
+    dataService.getAllIndividuals().forEach(person => {
+      const pill = document.getElementById(`kinship_pill_${person.id}`);
+      if (pill) {
+        const kinship = kinshipService.calculateRelationship(focalId, person.id);
+        if (kinship) {
+          pill.className = `node-kinship-pill ${kinship.relationType}`;
+          pill.textContent = kinship.tagText;
+          pill.title = `${kinship.english} • ${kinship.tamil}`;
+          pill.style.display = 'inline-flex';
+        } else {
+          pill.style.display = 'none';
+        }
+      }
+    });
   }
 
   private renderHierarchicalTree(): void {
@@ -767,6 +788,8 @@ export class TreeRenderer {
       ? `b. ${person.birthYear}${person.passingYear ? ` – ${person.passingYear}` : ''}`
       : (person.isLiving ? '🟢 Living' : '⚪ Deceased');
 
+    const kinship = kinshipService.calculateRelationship(this.focusedPersonId, person.id);
+
     card.innerHTML = `
       <div class="node-branch-stripe ${branchColorClass}"></div>
       <div class="node-content">
@@ -777,6 +800,9 @@ export class TreeRenderer {
           <div class="node-meta">
             <span class="node-lifespan">${lifespan}</span>
             ${person.nativePlace ? `<span class="node-place">📍 ${person.nativePlace.split(',')[0]}</span>` : ''}
+          </div>
+          <div class="node-kinship-pill ${kinship ? kinship.relationType : ''}" id="kinship_pill_${person.id}" title="${kinship ? `${kinship.english} • ${kinship.tamil}` : ''}">
+            ${kinship ? kinship.tagText : ''}
           </div>
         </div>
       </div>
@@ -814,11 +840,16 @@ export class TreeRenderer {
   }
 
   selectNode(id: number | string, openDrawer = true): void {
-    this.selectedId = Number(id);
+    const numId = Number(id);
+    this.selectedId = numId;
+    this.focusedPersonId = numId;
 
     document.querySelectorAll('.node-card').forEach(n => n.classList.remove('selected'));
     const active = document.getElementById(`node_${id}`);
     if (active) active.classList.add('selected');
+
+    // Update all kinship pills across all cards dynamically in real-time
+    this.updateAllKinshipPills(numId);
 
     const person = dataService.getIndividual(id);
     if (person) {
@@ -832,6 +863,7 @@ export class TreeRenderer {
   focusPedigree(id: number | string): void {
     this.viewMode = 'PEDIGREE';
     this.focalMemberId = Number(id);
+    this.focusedPersonId = Number(id);
     this.render();
     this.resetView();
     trackEvent('interaction', 'lineage_trace', { id: Number(id) });

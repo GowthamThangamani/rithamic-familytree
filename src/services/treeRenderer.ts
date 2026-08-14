@@ -40,9 +40,9 @@ export class TreeRenderer {
   private collapsedNodes = new Set<number>();
 
   private readonly CARD_WIDTH = 230;
-  private readonly COUPLE_WIDTH = 500;
+  private readonly COUPLE_WIDTH = 524;
   private readonly CARD_HEIGHT = 125;
-  private readonly H_GAP = 36;
+  private readonly H_GAP = 60;
   private readonly V_GAP = 140;
 
   constructor(containerElement: HTMLElement, onNodeSelect: (person: Individual) => void) {
@@ -427,6 +427,15 @@ export class TreeRenderer {
     }
 
     let childLeft = leftX;
+    let childrenTotalWidth = 0;
+    unit.children.forEach(c => {
+      childrenTotalWidth += c.subtreeWidth;
+    });
+
+    if (childrenTotalWidth < unit.subtreeWidth) {
+      childLeft += (unit.subtreeWidth - childrenTotalWidth) / 2;
+    }
+
     unit.children.forEach(child => {
       this.assignCoordinates(child, childLeft, currentY + this.CARD_HEIGHT + this.V_GAP);
       childLeft += child.subtreeWidth;
@@ -436,7 +445,7 @@ export class TreeRenderer {
     const lastChild = unit.children[unit.children.length - 1];
     const childrenMidX = (firstChild.x + firstChild.width / 2 + lastChild.x + lastChild.width / 2) / 2;
 
-    unit.x = childrenMidX - unit.width / 2;
+    unit.x = Math.max(leftX, childrenMidX - unit.width / 2);
   }
 
   private renderSubtreeConnectors(unit: TreeNodeUnit): void {

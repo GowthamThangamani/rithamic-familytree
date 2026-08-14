@@ -438,6 +438,8 @@ body {
   gap: 10px;
   position: relative;
   transition: all 0.2s;
+  box-sizing: border-box;
+  width: 524px;
 }
 
 .couple-unit-container:hover {

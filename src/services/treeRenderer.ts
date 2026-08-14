@@ -38,7 +38,7 @@ export class TreeRenderer {
   public viewMode: 'TREE' | 'PEDIGREE' | 'MATRIX' = 'TREE';
   public focalMemberId: number | null = null;
   public focalTreeRootId: number | null = null;
-  public focusedPersonId: number = 1; // Default focal perspective (Gowtham #1)
+  public focalKinshipPersonId: number = 1; // Explicit kinship perspective (Default: Gowtham #1)
   private collapsedNodes = new Set<number>();
 
   private readonly CARD_WIDTH = 230;
@@ -51,6 +51,10 @@ export class TreeRenderer {
     this.container = containerElement;
     this.onNodeSelect = onNodeSelect;
     this.initCanvas();
+  }
+
+  public get focusedPersonId(): number {
+    return this.focalKinshipPersonId;
   }
 
   private initCanvas(): void {
@@ -132,7 +136,6 @@ export class TreeRenderer {
   }
 
   public centerOnNode(nodeId: number): void {
-    // Un-collapse all ancestors so node is visible
     this.uncollapseAncestors(nodeId);
     this.render();
 
@@ -148,7 +151,6 @@ export class TreeRenderer {
         this.panY = vRect.height / 3 - elCenterY * this.zoom;
         this.updateTransform();
 
-        // Pulsing glow animation
         el.classList.add('focal-node');
         setTimeout(() => el.classList.remove('focal-node'), 3000);
       }
@@ -166,6 +168,60 @@ export class TreeRenderer {
 
   private updateTransform(): void {
     this.canvas.style.transform = `translate(${this.panX}px, ${this.panY}px) scale(${this.zoom})`;
+  }
+
+  // ==========================================================================
+  // EXPLICIT KINSHIP PERSPECTIVE FOCUS
+  // ==========================================================================
+
+  public setKinshipFocus(personId: number): void {
+    this.focalKinshipPersonId = personId;
+    this.updateAllKinshipPills(personId);
+
+    // Update button states on all cards
+    document.querySelectorAll('.btn-focus').forEach(btn => {
+      const card = btn.closest('.node-card') as HTMLElement;
+      const cId = Number(card?.dataset.id);
+      if (cId === personId) {
+        btn.classList.add('is-active-focus');
+        btn.innerHTML = '🎯 Active';
+      } else {
+        btn.classList.remove('is-active-focus');
+        btn.innerHTML = '🎯 Focus';
+      }
+    });
+
+    // Update Viewpoint Banner
+    const banner = document.getElementById('kinshipViewpointBar');
+    if (banner) {
+      const person = dataService.getIndividual(personId);
+      banner.innerHTML = `
+        <span>👁️ Relations Perspective: <strong>${person ? person.fullName : 'Member'}</strong></span>
+        ${personId !== 1 ? `<button class="btn-reset-viewpoint" id="btnResetViewpoint">↺ Reset to Gowtham</button>` : ''}
+      `;
+      banner.querySelector('#btnResetViewpoint')?.addEventListener('click', () => {
+        this.setKinshipFocus(1);
+      });
+    }
+
+    trackEvent('interaction', 'set_kinship_focus', { id: personId });
+  }
+
+  public updateAllKinshipPills(focalId: number): void {
+    dataService.getAllIndividuals().forEach(person => {
+      const pill = document.getElementById(`kinship_pill_${person.id}`);
+      if (pill) {
+        const kinship = kinshipService.calculateRelationship(focalId, person.id);
+        if (kinship) {
+          pill.className = `node-kinship-pill ${kinship.relationType}`;
+          pill.textContent = kinship.tagText;
+          pill.title = `${kinship.english} • ${kinship.tamil}`;
+          pill.style.display = 'inline-flex';
+        } else {
+          pill.style.display = 'none';
+        }
+      }
+    });
   }
 
   // ==========================================================================
@@ -240,7 +296,6 @@ export class TreeRenderer {
   public showFamilyTree(personId: number): void {
     this.viewMode = 'TREE';
     this.focalTreeRootId = personId;
-    this.focusedPersonId = personId;
     this.render();
     this.centerOnNode(personId);
     trackEvent('interaction', 'view_family_tree', { id: personId });
@@ -251,24 +306,6 @@ export class TreeRenderer {
     this.render();
     this.fitToScreen();
     trackEvent('interaction', 'reset_tree_focus');
-  }
-
-  public updateAllKinshipPills(focalId: number): void {
-    this.focusedPersonId = focalId;
-    dataService.getAllIndividuals().forEach(person => {
-      const pill = document.getElementById(`kinship_pill_${person.id}`);
-      if (pill) {
-        const kinship = kinshipService.calculateRelationship(focalId, person.id);
-        if (kinship) {
-          pill.className = `node-kinship-pill ${kinship.relationType}`;
-          pill.textContent = kinship.tagText;
-          pill.title = `${kinship.english} • ${kinship.tamil}`;
-          pill.style.display = 'inline-flex';
-        } else {
-          pill.style.display = 'none';
-        }
-      }
-    });
   }
 
   private renderHierarchicalTree(): void {
@@ -289,7 +326,7 @@ export class TreeRenderer {
 
     // 1. Calculate Layout Coordinates
     let currentX = 60;
-    const startY = this.focalTreeRootId ? 110 : 60;
+    const startY = this.focalTreeRootId ? 110 : 80;
 
     treeRoots.forEach(root => {
       this.calculateSubtreeWidths(root);
@@ -334,18 +371,32 @@ export class TreeRenderer {
       this.renderSubtreeCards(root);
     });
 
-    // 4. Render Focus Banner if viewing single tree
+    // 4. Render Floating Kinship Viewpoint Status Bar
+    const focalPerson = dataService.getIndividual(this.focalKinshipPersonId);
+    const viewpointBar = document.createElement('div');
+    viewpointBar.className = 'kinship-viewpoint-bar';
+    viewpointBar.id = 'kinshipViewpointBar';
+    viewpointBar.innerHTML = `
+      <span>👁️ Relations Perspective: <strong>${focalPerson ? focalPerson.fullName : 'Member'}</strong></span>
+      ${this.focalKinshipPersonId !== 1 ? `<button class="btn-reset-viewpoint" id="btnResetViewpoint">↺ Reset to Gowtham</button>` : ''}
+    `;
+    viewpointBar.querySelector('#btnResetViewpoint')?.addEventListener('click', () => {
+      this.setKinshipFocus(1);
+    });
+    this.htmlLayer.appendChild(viewpointBar);
+
+    // 5. Render Focus Lineage Banner if viewing single lineage tree
     if (this.focalTreeRootId !== null) {
-      const focalPerson = dataService.getIndividual(this.focalTreeRootId);
-      if (focalPerson) {
+      const focalTreePerson = dataService.getIndividual(this.focalTreeRootId);
+      if (focalTreePerson) {
         const banner = document.createElement('div');
         banner.className = 'tree-focus-banner';
-        const parents = dataService.getParents(focalPerson.id);
+        const parents = dataService.getParents(focalTreePerson.id);
         const parentText = parents.length > 0 ? `Parents: ${parents.map(p => p.fullName).join(' & ')}` : 'Ancestral Root';
         banner.innerHTML = `
           <div class="tree-focus-info">
-            <span class="focus-title">🌳 Viewing Tree: <strong>${focalPerson.fullName}</strong> ${focalPerson.tamilName ? `(${focalPerson.tamilName})` : ''}</span>
-            <span class="focus-parents">${parentText} &bull; Generation ${focalPerson.generation}</span>
+            <span class="focus-title">🌳 Viewing Lineage Tree: <strong>${focalTreePerson.fullName}</strong> ${focalTreePerson.tamilName ? `(${focalTreePerson.tamilName})` : ''}</span>
+            <span class="focus-parents">${parentText} &bull; Generation ${focalTreePerson.generation}</span>
           </div>
           <button class="btn-reset-focus" id="btnResetTreeFocus">↺ View All Lineages</button>
         `;
@@ -358,14 +409,12 @@ export class TreeRenderer {
   }
 
   private findRootIndividuals(): Individual[] {
-    // If a focal tree root is active, show only that root!
     if (this.focalTreeRootId !== null) {
       const topRoot = this.getTopAncestor(this.focalTreeRootId);
       if (topRoot) return [topRoot];
     }
 
     const all = dataService.getAllIndividuals();
-    // Return all root ancestors who have no parents recorded in the database and have children or are Gen 1
     const roots = all.filter(p => {
       const parents = dataService.getParents(p.id);
       const children = dataService.getChildren(p.id);
@@ -387,7 +436,6 @@ export class TreeRenderer {
     const spouses = dataService.getSpouses(person.id);
     const spouse = spouses.length > 0 ? spouses[0] : null;
 
-    // Get children of either parent
     const childrenSet = new Set<number>();
     dataService.getChildren(person.id).forEach(c => childrenSet.add(c.id));
     if (spouse) {
@@ -473,7 +521,6 @@ export class TreeRenderer {
     const parentBottomX = unit.x + unit.width / 2;
     const parentBottomY = unit.y + this.CARD_HEIGHT;
 
-    // 1. Spousal Connector if couple
     if (unit.spouse) {
       const c1CenterX = unit.x + this.CARD_WIDTH / 2;
       const c2CenterX = unit.x + this.CARD_WIDTH + 40 + this.CARD_WIDTH / 2;
@@ -488,11 +535,9 @@ export class TreeRenderer {
       this.svgLayer.appendChild(spLine);
     }
 
-    // 2. Parent-to-Children Drop Lines & Bus Rails
     if (unit.children.length > 0 && !unit.isCollapsed) {
       const busY = parentBottomY + 45;
 
-      // Vertical trunk drop from parent center down to bus rail
       const trunkLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
       trunkLine.setAttribute('x1', String(parentBottomX));
       trunkLine.setAttribute('y1', String(parentBottomY));
@@ -501,7 +546,6 @@ export class TreeRenderer {
       trunkLine.setAttribute('class', 'svg-branch-line');
       this.svgLayer.appendChild(trunkLine);
 
-      // Horizontal bus rail spanning across all children
       const firstChild = unit.children[0];
       const lastChild = unit.children[unit.children.length - 1];
       const busStartX = firstChild.x + firstChild.width / 2;
@@ -515,7 +559,6 @@ export class TreeRenderer {
       busLine.setAttribute('class', 'svg-branch-bus');
       this.svgLayer.appendChild(busLine);
 
-      // Vertical fork drops from bus down into top center of each child unit
       unit.children.forEach(child => {
         const childTopX = child.x + child.width / 2;
         const childTopY = child.y;
@@ -528,7 +571,6 @@ export class TreeRenderer {
         forkLine.setAttribute('class', 'svg-branch-fork');
         this.svgLayer.appendChild(forkLine);
 
-        // Recursively render child connectors
         this.renderSubtreeConnectors(child);
       });
     }
@@ -542,7 +584,6 @@ export class TreeRenderer {
     container.style.width = `${unit.width}px`;
 
     if (unit.spouse) {
-      // Couple Unit Box
       const coupleBox = document.createElement('div');
       coupleBox.className = 'couple-unit-container';
       
@@ -557,7 +598,6 @@ export class TreeRenderer {
       coupleBox.appendChild(ring);
       coupleBox.appendChild(card2);
 
-      // Subtree Toggle Pill on bottom center
       if (unit.children.length > 0) {
         const toggleBtn = document.createElement('button');
         toggleBtn.className = 'btn-subtree-toggle';
@@ -572,7 +612,6 @@ export class TreeRenderer {
 
       container.appendChild(coupleBox);
     } else {
-      // Single Individual Box
       const card = this.createNodeCard(unit.person);
       container.appendChild(card);
 
@@ -628,7 +667,6 @@ export class TreeRenderer {
 
     const body = pedigreeWrapper.querySelector('#pedigreeBody') as HTMLElement;
 
-    // Group by generations
     const genGroups = new Map<number, Individual[]>();
     for (let g = 1; g <= 6; g++) genGroups.set(g, []);
 
@@ -788,7 +826,8 @@ export class TreeRenderer {
       ? `b. ${person.birthYear}${person.passingYear ? ` – ${person.passingYear}` : ''}`
       : (person.isLiving ? '🟢 Living' : '⚪ Deceased');
 
-    const kinship = kinshipService.calculateRelationship(this.focusedPersonId, person.id);
+    const isFocalKinship = this.focalKinshipPersonId === person.id;
+    const kinship = kinshipService.calculateRelationship(this.focalKinshipPersonId, person.id);
 
     card.innerHTML = `
       <div class="node-branch-stripe ${branchColorClass}"></div>
@@ -813,10 +852,13 @@ export class TreeRenderer {
         <button class="node-btn btn-lineage" data-action="lineage" title="View Family Tree">
           🌳 Tree
         </button>
+        <button class="node-btn btn-focus ${isFocalKinship ? 'is-active-focus' : ''}" data-action="focus" title="Set as Perspective Reference">
+          ${isFocalKinship ? '🎯 Active' : '🎯 Focus'}
+        </button>
       </div>
     `;
 
-    // Click on Card Body: Highlight node (DO NOT OPEN DRAWER)
+    // Click on Card Body: Highlight node (DOES NOT OPEN DRAWER, DOES NOT CHANGE KINSHIP)
     card.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       if (target.closest('.node-btn')) return;
@@ -830,10 +872,16 @@ export class TreeRenderer {
       this.selectNode(person.id, true);
     });
 
-    // Button 2: Tree Focus (SHOWS HER/HIS SPECIFIC TREE, DOES NOT OPEN DRAWER)
+    // Button 2: Tree Focus (SHOWS HER/HIS SPECIFIC TREE, DOES NOT CHANGE KINSHIP PERSPECTIVE)
     card.querySelector('.btn-lineage')?.addEventListener('click', (e) => {
       e.stopPropagation();
       this.showFamilyTree(person.id);
+    });
+
+    // Button 3: Dedicated Perspective Focus (EXPLICITLY SETS AS KINSHIP PERSPECTIVE)
+    card.querySelector('.btn-focus')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.setKinshipFocus(person.id);
     });
 
     return card;
@@ -842,28 +890,23 @@ export class TreeRenderer {
   selectNode(id: number | string, openDrawer = true): void {
     const numId = Number(id);
     this.selectedId = numId;
-    this.focusedPersonId = numId;
 
     document.querySelectorAll('.node-card').forEach(n => n.classList.remove('selected'));
     const active = document.getElementById(`node_${id}`);
     if (active) active.classList.add('selected');
-
-    // Update all kinship pills across all cards dynamically in real-time
-    this.updateAllKinshipPills(numId);
 
     const person = dataService.getIndividual(id);
     if (person) {
       if (openDrawer && this.onNodeSelect) {
         this.onNodeSelect(person);
       }
-      trackEvent('interaction', 'node_focus', { id: person.id, name: person.fullName });
+      trackEvent('interaction', 'node_select', { id: person.id, name: person.fullName });
     }
   }
 
   focusPedigree(id: number | string): void {
     this.viewMode = 'PEDIGREE';
     this.focalMemberId = Number(id);
-    this.focusedPersonId = Number(id);
     this.render();
     this.resetView();
     trackEvent('interaction', 'lineage_trace', { id: Number(id) });

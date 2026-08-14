@@ -7,25 +7,73 @@ import { trackEvent } from './services/telemetryService.ts';
 let treeRenderer: TreeRenderer | null = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
-  dataService.load();
+  // 1. Fetch live PostgreSQL dataset
+  await dataService.load();
+  updateDbStatusUI();
 
+  // 2. Initialize Tree Renderer
   const treeContainer = document.getElementById('treeContainer') as HTMLElement;
   treeRenderer = new TreeRenderer(treeContainer, handleNodeSelection);
   treeRenderer.render();
   treeRenderer.fitToScreen();
 
+  // 3. Central SSO & Auth
   await auth.handleUrlTicketExchange();
   updateAuthUI();
 
+  // 4. Bind controls
+  setupViewModeTabs();
   setupSearch();
   setupFiltersAndControls();
   setupAuthModal();
   setupDrawer();
 
   trackEvent('page_view', 'familytree_loaded', {
-    totalMembers: dataService.getAllIndividuals().length
+    totalMembers: dataService.getAllIndividuals().length,
+    dataSource: dataService.dataSource
   });
 });
+
+function updateDbStatusUI(): void {
+  const badgeText = document.getElementById('dbStatusText');
+  const badge = document.getElementById('dbStatusBadge');
+  if (!badgeText || !badge) return;
+
+  if (dataService.dataSource === 'postgresql_database') {
+    badgeText.textContent = '🐘 PostgreSQL Live';
+    badge.title = 'Connected live to PostgreSQL database (rithamic_familytree)';
+    badge.style.background = 'rgba(16, 185, 129, 0.12)';
+    badge.style.borderColor = 'rgba(16, 185, 129, 0.35)';
+  } else {
+    badgeText.textContent = '📦 Local Dataset';
+    badge.title = 'Loaded from local dataset snapshot';
+    badge.style.background = 'rgba(245, 158, 11, 0.12)';
+    badge.style.borderColor = 'rgba(245, 158, 11, 0.35)';
+  }
+}
+
+function setupViewModeTabs(): void {
+  const tabs = document.querySelectorAll<HTMLButtonElement>('.view-tab');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      const mode = tab.dataset.view as 'TREE' | 'PEDIGREE' | 'MATRIX';
+      if (treeRenderer) {
+        treeRenderer.viewMode = mode;
+        if (mode === 'PEDIGREE' && !treeRenderer.focalMemberId) {
+          // Default focal to Gowtham (#1) or Periya Pannai (#19)
+          treeRenderer.focalMemberId = 1;
+        }
+        treeRenderer.render();
+        treeRenderer.resetView();
+        trackEvent('interaction', 'view_mode_changed', { mode });
+      }
+    });
+  });
+}
 
 function updateAuthUI(): void {
   const guestView = document.getElementById('guestAuthView') as HTMLElement;
@@ -103,7 +151,10 @@ function renderSearchResults(results: SearchMatch[]): void {
     item.addEventListener('click', () => {
       searchDropdown.classList.add('hidden');
       (document.getElementById('searchInput') as HTMLInputElement).value = ind.fullName;
-      if (treeRenderer) treeRenderer.selectNode(ind.id);
+      if (treeRenderer) {
+        treeRenderer.selectNode(ind.id);
+        treeRenderer.centerOnNode(ind.id);
+      }
     });
 
     searchDropdown.appendChild(item);
@@ -136,7 +187,7 @@ function handleNodeSelection(rawPerson: Individual): void {
         <span class="badge-tag">${person.isLiving ? '🟢 Living' : '⚪ Deceased'}</span>
       </div>
       <button class="btn-auth" id="btnFocusPedigree" style="margin-top: 14px; width: 100%; justify-content: center;">
-        🌳 Trace Full Ancestral Lineage
+        🌳 Focus Tree
       </button>
     </div>
 
@@ -179,7 +230,7 @@ function handleNodeSelection(rawPerson: Individual): void {
         </div>
         <div class="info-row">
           <span class="info-label">Native Place:</span>
-          <span class="info-value">${person.nativePlace || 'Kangayam'}</span>
+          <span class="info-value">${person.nativePlace || 'Kangayam, Tamil Nadu'}</span>
         </div>
         <div class="info-row">
           <span class="info-label">Branch:</span>
@@ -211,14 +262,21 @@ function handleNodeSelection(rawPerson: Individual): void {
   `;
 
   drawerBody.querySelector('#btnFocusPedigree')?.addEventListener('click', () => {
-    if (treeRenderer) treeRenderer.traceFullLineage(person.id);
+    if (treeRenderer) {
+      treeRenderer.focusPedigree(person.id);
+      document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('tabPedigree')?.classList.add('active');
+    }
     drawer.classList.remove('open');
   });
 
   drawerBody.querySelectorAll<HTMLButtonElement>('.rel-chip').forEach(chip => {
     chip.addEventListener('click', () => {
       const targetId = chip.dataset.id;
-      if (targetId && treeRenderer) treeRenderer.selectNode(targetId);
+      if (targetId && treeRenderer) {
+        treeRenderer.selectNode(targetId);
+        treeRenderer.centerOnNode(Number(targetId));
+      }
     });
   });
 
@@ -246,6 +304,9 @@ function setupFiltersAndControls(): void {
     trackEvent('filter_change', 'generation_filtered', { generation: generationFilter.value });
   });
 
+  document.getElementById('btnExpandAll')?.addEventListener('click', () => treeRenderer?.expandAll());
+  document.getElementById('btnCollapseAll')?.addEventListener('click', () => treeRenderer?.collapseAll());
+
   document.getElementById('btnZoomIn')?.addEventListener('click', () => treeRenderer?.zoomIn());
   document.getElementById('btnZoomOut')?.addEventListener('click', () => treeRenderer?.zoomOut());
   document.getElementById('btnResetView')?.addEventListener('click', () => treeRenderer?.resetView());
@@ -270,10 +331,10 @@ function setupAuthModal(): void {
   const quickOtpCode = document.getElementById('quickOtpCode') as HTMLInputElement;
   const btnVerifyQuickOtp = document.getElementById('btnVerifyQuickOtp') as HTMLButtonElement;
 
-  btnOpenLogin.addEventListener('click', openLoginModal);
-  btnCloseModal.addEventListener('click', closeLoginModal);
+  btnOpenLogin?.addEventListener('click', openLoginModal);
+  btnCloseModal?.addEventListener('click', closeLoginModal);
 
-  btnLogout.addEventListener('click', () => {
+  btnLogout?.addEventListener('click', () => {
     auth.logout();
     updateAuthUI();
     if (treeRenderer && treeRenderer.selectedId) {
@@ -282,13 +343,13 @@ function setupAuthModal(): void {
     }
   });
 
-  btnSsoRedirect.addEventListener('click', () => {
+  btnSsoRedirect?.addEventListener('click', () => {
     auth.redirectToCentralLogin();
   });
 
   let currentOtpEmail = '';
 
-  quickOtpForm.addEventListener('submit', async (e) => {
+  quickOtpForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = quickOtpEmail.value.trim().toLowerCase();
     if (!email) return;
@@ -313,7 +374,7 @@ function setupAuthModal(): void {
     }
   });
 
-  btnVerifyQuickOtp.addEventListener('click', async () => {
+  btnVerifyQuickOtp?.addEventListener('click', async () => {
     const code = quickOtpCode.value.trim();
     if (code.length !== 6) {
       alert("Please enter the 6-digit verification code.");

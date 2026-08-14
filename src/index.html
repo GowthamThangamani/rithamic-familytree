@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rithamic Family Tree – Thangamani / Periya Pannai Lineage</title>
-  <link rel="stylesheet" href="./src/style.css">
+  <link rel="stylesheet" href="./style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌳</text></svg>">
 </head>
 <body>
@@ -16,6 +16,10 @@
       <div class="brand-info">
         <h1>Rithamic Family Tree</h1>
         <p>Thangamani &bull; Periya Pannai Lineage (60 Members)</p>
+      </div>
+      <div class="db-status-badge" id="dbStatusBadge" title="Connected to PostgreSQL (rithamic_familytree)">
+        <span class="db-status-dot"></span>
+        <span id="dbStatusText">🐘 PostgreSQL Live</span>
       </div>
     </div>
 
@@ -51,6 +55,13 @@
 
   <!-- Toolbar & Filters -->
   <div class="toolbar-bar">
+    <!-- View Switcher Tabs -->
+    <div class="view-mode-tabs">
+      <button class="view-tab active" data-view="TREE" id="tabTree">🌳 Tree Chart</button>
+      <button class="view-tab" data-view="PEDIGREE" id="tabPedigree">🌿 Pedigree Focus</button>
+      <button class="view-tab" data-view="MATRIX" id="tabMatrix">📊 Matrix Overview</button>
+    </div>
+
     <div class="filter-group">
       <label for="branchFilter" style="color: #94a3b8;">Branch:</label>
       <select id="branchFilter" class="filter-select">
@@ -61,7 +72,7 @@
         <option value="Palani Vel">Palani Vel Appa Lineage</option>
       </select>
 
-      <label for="generationFilter" style="color: #94a3b8; margin-left: 12px;">Generation:</label>
+      <label for="generationFilter" style="color: #94a3b8; margin-left: 12px;">Gen:</label>
       <select id="generationFilter" class="filter-select">
         <option value="ALL">All 6 Generations</option>
         <option value="1">Gen 1 – Forefathers</option>
@@ -71,6 +82,11 @@
         <option value="5">Gen 5 – Contemporary</option>
         <option value="6">Gen 6 – Children</option>
       </select>
+    </div>
+
+    <div class="tree-quick-controls">
+      <button class="ctrl-btn-text" id="btnExpandAll" title="Expand all branches">➕ Expand All</button>
+      <button class="ctrl-btn-text" id="btnCollapseAll" title="Collapse branches">➖ Collapse All</button>
     </div>
 
     <div class="canvas-controls">
@@ -131,6 +147,6 @@
     </div>
   </div>
 
-  <script type="module" src="./src/app.ts"></script>
+  <script type="module" src="./app.ts"></script>
 </body>
 </html>

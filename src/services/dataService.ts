@@ -1,114 +1,128 @@
 import { Branch, Individual, SearchMatch } from '../types/index.ts';
-import datasetJson from '../family_tree_dataset.json';
 
 class DataService {
   private individualsMap = new Map<number, Individual>();
   public branches: Branch[] = [];
   public isLoaded = false;
+  public dataSource: 'postgresql_database' = 'postgresql_database';
 
-  load(): void {
-    if (this.isLoaded) return;
-    
+  async load(): Promise<void> {
     try {
-      const rawData = datasetJson as any;
-      this.branches = rawData.branches || [];
+      const response = await fetch('/api/familytree/data');
+      if (!response.ok) {
+        throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
+      }
 
-      const rawList: any[] = rawData.persons || rawData.individuals || [];
+      const dbData = await response.json();
+      if (!dbData.success || !dbData.persons) {
+        throw new Error(dbData.error || 'Invalid API response from PostgreSQL server.');
+      }
 
-      // 1. Initial Ingestion
-      rawList.forEach((p: any) => {
-        const spouses = (p.spouses || []).map((s: any) => (typeof s === 'object' && s !== null ? s.spouseId : s)).filter(Boolean);
-        const parents = (p.parents || []).map((s: any) => (typeof s === 'object' && s !== null ? s.id : s)).filter(Boolean);
-        const children = (p.children || []).map((s: any) => (typeof s === 'object' && s !== null ? s.id : s)).filter(Boolean);
-        const siblings = (p.siblings || []).map((s: any) => (typeof s === 'object' && s !== null ? s.id : s)).filter(Boolean);
-
-        const ind: Individual = {
-          id: p.id,
-          fullName: p.fullName,
-          tamilName: p.tamilName || null,
-          gender: p.gender && p.gender.toLowerCase() === 'female' ? 'female' : 'male',
-          generation: p.identityClues?.generationLevel || p.generation || 1,
-          isLiving: Boolean(p.isLiving),
-          birthYear: p.dob ? p.dob.substring(0, 4) : (p.birthYear || null),
-          passingYear: p.dod ? p.dod.substring(0, 4) : (p.passingYear || null),
-          nativePlace: p.nativePlace || 'Kangayam, Tamil Nadu',
-          branch: p.identityClues?.branchName || p.branch || 'Main Lineage',
-          contact: p.contacts && p.contacts.length > 0 ? p.contacts[0].value : (p.contact || null),
-          address: p.addresses && p.addresses.length > 0 ? p.addresses[0].value : (p.address || null),
-          occupation: p.occupation || null,
-          notes: p.identityClues?.searchDescriptor || p.notes || '',
-          parents,
-          spouses,
-          children,
-          siblings,
-          identityClues: p.identityClues
-        };
-
-        this.individualsMap.set(ind.id, ind);
-      });
-
-      // 2. Bidirectional Enrichment from relationships array
-      const rawRelationships: any[] = rawData.relationships || [];
-      rawRelationships.forEach((r: any) => {
-        if (r.type === 'spouse') {
-          const a = this.individualsMap.get(r.personAId);
-          const b = this.individualsMap.get(r.personBId);
-          if (a && !a.spouses?.includes(r.personBId)) a.spouses?.push(r.personBId);
-          if (b && !b.spouses?.includes(r.personAId)) b.spouses?.push(r.personAId);
-        } else if (r.type === 'parent_child') {
-          const p = this.individualsMap.get(r.parentPersonId);
-          const c = this.individualsMap.get(r.childPersonId);
-          if (p && !p.children?.includes(r.childPersonId)) p.children?.push(r.childPersonId);
-          if (c && !c.parents?.includes(r.parentPersonId)) c.parents?.push(r.parentPersonId);
-        }
-      });
-
-      // 3. Parental Marriage Linkage (Connect children to both married parents)
-      this.individualsMap.forEach((ind) => {
-        if (ind.parents && ind.parents.length > 0) {
-          const currentParents = [...ind.parents];
-          currentParents.forEach((pid) => {
-            const parent = this.individualsMap.get(pid);
-            if (parent && parent.spouses) {
-              parent.spouses.forEach((sid) => {
-                if (!ind.parents?.includes(sid)) ind.parents?.push(sid);
-                const spouse = this.individualsMap.get(sid);
-                if (spouse && !spouse.children?.includes(ind.id)) spouse.children?.push(ind.id);
-              });
-            }
-          });
-        }
-      });
-
-      // 4. Normalize Siblings across shared parents
-      this.individualsMap.forEach((ind) => {
-        if (ind.parents && ind.parents.length > 0) {
-          ind.parents.forEach((pid) => {
-            const parent = this.individualsMap.get(pid);
-            if (parent && parent.children) {
-              parent.children.forEach((cid) => {
-                if (cid !== ind.id && !ind.siblings?.includes(cid)) {
-                  ind.siblings?.push(cid);
-                }
-              });
-            }
-          });
-        }
-      });
-
-      this.isLoaded = true;
-    } catch (err) {
-      console.error("Failed to load family dataset:", err);
+      this.ingest(dbData);
+      console.log(`🐘 [DataService] Connected live to PostgreSQL Database (rithamic_familytree): Loaded ${this.individualsMap.size} family members.`);
+    } catch (err: any) {
+      console.error('❌ [DataService] Failed to load data from PostgreSQL Database:', err.message);
+      throw err;
     }
   }
 
+  private ingest(rawData: any): void {
+    this.individualsMap.clear();
+    this.branches = rawData.branches || [];
+
+    const rawList: any[] = rawData.persons || [];
+
+    // 1. Ingest all individuals
+    rawList.forEach((p: any) => {
+      const spouses = (p.spouses || []).map((s: any) => (typeof s === 'object' && s !== null ? s.spouseId : s)).filter(Boolean);
+      const parents = (p.parents || []).map((s: any) => (typeof s === 'object' && s !== null ? s.id || s : s)).filter(Boolean);
+      const children = (p.children || []).map((s: any) => (typeof s === 'object' && s !== null ? s.id || s : s)).filter(Boolean);
+      const siblings = (p.siblings || []).map((s: any) => (typeof s === 'object' && s !== null ? s.id || s : s)).filter(Boolean);
+
+      const ind: Individual = {
+        id: p.id,
+        fullName: p.fullName,
+        tamilName: p.tamilName || null,
+        gender: p.gender && p.gender.toLowerCase() === 'female' ? 'female' : 'male',
+        generation: p.generation || 1,
+        isLiving: Boolean(p.isLiving),
+        birthYear: p.birthYear || (p.dob ? p.dob.substring(0, 4) : null),
+        passingYear: p.passingYear || (p.dod ? p.dod.substring(0, 4) : null),
+        nativePlace: p.nativePlace || 'Kangayam, Tamil Nadu',
+        branch: p.branch || 'Main Lineage',
+        contact: p.contacts && p.contacts.length > 0 ? (typeof p.contacts[0] === 'object' ? p.contacts[0].value : p.contacts[0]) : (p.contact || null),
+        address: p.addresses && p.addresses.length > 0 ? (typeof p.addresses[0] === 'object' ? p.addresses[0].value : p.addresses[0]) : (p.address || null),
+        occupation: p.occupation || null,
+        notes: p.identityClues?.searchDescriptor || p.notes || '',
+        parents,
+        spouses,
+        children,
+        siblings,
+        identityClues: p.identityClues
+      };
+
+      this.individualsMap.set(ind.id, ind);
+    });
+
+    // 2. Bidirectional Enrichment from relationships
+    const rawRelationships: any[] = rawData.relationships || [];
+    rawRelationships.forEach((r: any) => {
+      if (r.type === 'spouse') {
+        const a = this.individualsMap.get(r.personAId);
+        const b = this.individualsMap.get(r.personBId);
+        if (a && !a.spouses?.includes(r.personBId)) a.spouses?.push(r.personBId);
+        if (b && !b.spouses?.includes(r.personAId)) b.spouses?.push(r.personAId);
+      } else if (r.type === 'parent_child') {
+        const parentId = r.personAId || r.parentPersonId;
+        const childId = r.personBId || r.childPersonId;
+        const p = this.individualsMap.get(parentId);
+        const c = this.individualsMap.get(childId);
+        if (p && !p.children?.includes(childId)) p.children?.push(childId);
+        if (c && !c.parents?.includes(parentId)) c.parents?.push(parentId);
+      }
+    });
+
+    // 3. Parental Marriage Linkage (Connect children to both married parents)
+    this.individualsMap.forEach((ind) => {
+      if (ind.parents && ind.parents.length > 0) {
+        const currentParents = [...ind.parents];
+        currentParents.forEach((pid) => {
+          const parent = this.individualsMap.get(pid);
+          if (parent && parent.spouses) {
+            parent.spouses.forEach((sid) => {
+              if (!ind.parents?.includes(sid)) ind.parents?.push(sid);
+              const spouse = this.individualsMap.get(sid);
+              if (spouse && !spouse.children?.includes(ind.id)) spouse.children?.push(ind.id);
+            });
+          }
+        });
+      }
+    });
+
+    // 4. Normalize Siblings across shared parents
+    this.individualsMap.forEach((ind) => {
+      if (ind.parents && ind.parents.length > 0) {
+        ind.parents.forEach((pid) => {
+          const parent = this.individualsMap.get(pid);
+          if (parent && parent.children) {
+            parent.children.forEach((cid) => {
+              if (cid !== ind.id && !ind.siblings?.includes(cid)) {
+                ind.siblings?.push(cid);
+              }
+            });
+          }
+        });
+      }
+    });
+
+    this.isLoaded = true;
+  }
+
   getAllIndividuals(): Individual[] {
-    if (!this.isLoaded) this.load();
     return Array.from(this.individualsMap.values());
   }
 
   getIndividual(id: number | string): Individual | null {
-    if (!this.isLoaded) this.load();
     return this.individualsMap.get(Number(id)) || null;
   }
 
@@ -204,11 +218,7 @@ class DataService {
     return descendants;
   }
 
-  /**
-   * Traces all direct path ancestors up to root (Periya Pannai) and returns ordered tiers
-   */
   getEntireAncestryPath(personId: number | string): { directPath: Individual[]; allRelatedInPath: Individual[] } {
-    if (!this.isLoaded) this.load();
     const focal = this.getIndividual(personId);
     if (!focal) return { directPath: [], allRelatedInPath: [] };
 
@@ -245,7 +255,6 @@ class DataService {
   }
 
   search(query: string): SearchMatch[] {
-    if (!this.isLoaded) this.load();
     if (!query || query.trim().length === 0) return [];
     const q = query.trim().toLowerCase();
 
@@ -294,7 +303,6 @@ class DataService {
   }
 
   getGenerationsMap(): Map<number, Individual[]> {
-    if (!this.isLoaded) this.load();
     const map = new Map<number, Individual[]>();
     for (let g = 1; g <= 6; g++) map.set(g, []);
 
@@ -304,6 +312,40 @@ class DataService {
       map.get(gen)!.push(ind);
     }
     return map;
+  }
+
+  // Direct database write methods
+  async addMember(member: Partial<Individual>): Promise<Individual> {
+    const res = await fetch('/api/familytree/members', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(member)
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    await this.load();
+    return data.member;
+  }
+
+  async updateMember(id: number, member: Partial<Individual>): Promise<Individual> {
+    const res = await fetch(`/api/familytree/members/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(member)
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    await this.load();
+    return data.member;
+  }
+
+  async deleteMember(id: number): Promise<void> {
+    const res = await fetch(`/api/familytree/members/${id}`, {
+      method: 'DELETE'
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    await this.load();
   }
 }
 
